@@ -30,9 +30,4 @@
  *
  ******************************************************************************/
 
-void motor_control__initialize(void);
-void motor_control__run_once(void);
-void motor_control__heartbeat(void);
-void motor_control__handle_speed(void);
-void motor_control__handle_steering(void);
-void motor_control__update_speed_and_steering(dbc_DRIVER_MOTOR_CONTROL_s *message);
+bool fake_driver__transmit_motor_messages_10Hz(void);

@@ -11,9 +11,16 @@
 // Private data for modules should be rare because all data should be part
 // of the module's struct instance
 
-const uint32_t dbc_mia_threshold_ACCELEROMETER_VALUE = 3 * 100;
+const uint32_t dbc_mia_threshold_DRIVER_HEARTBEAT = 3 * 1000;
+const uint32_t dbc_mia_threshold_MOTOR_HEARTBEAT = 3 * 1000;
+const uint32_t dbc_mia_threshold_DRIVER_MOTOR_CONTROL = 3 * 100;
+const uint32_t dbc_mia_threshold_SENSOR_SONARS = 3 * 50;
 
-const dbc_ACCELEROMETER_VALUE_s dbc_mia_replacement_ACCELEROMETER_VALUE;
+const dbc_DRIVER_HEARTBEAT_s dbc_mia_replacement_DRIVER_HEARTBEAT;
+const dbc_MOTOR_HEARTBEAT_s dbc_mia_replacement_MOTOR_HEARTBEAT;
+const dbc_DRIVER_MOTOR_CONTROL_s dbc_mia_replacement_DRIVER_MOTOR_CONTROL = {.DRIVER_MOTOR_CONTROL_SPEED_KPH = 0.0f,
+                                                                             .DRIVER_MOTOR_CONTROL_STEER = 0.0f};
+const dbc_SENSOR_SONARS_s dbc_mia_replacement_SENSOR_SONARS;
 
 /*******************************************************************************
  *
