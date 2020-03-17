@@ -20,8 +20,6 @@ const static can__num_e can_bus_num = can1;
 
 typedef enum {
   CAN_BUS_MESSAGE_HANDLER__MESSAGE_TEST,
-  CAN_BUS_MESSAGE_HANDLER__MESSAGE_SWITCH_EVENT,
-  CAN_BUS_MESSAGE_HANDLER__MESSAGE_ACCELERATION_Y_AXIS
 } can_bus_messsage_handler__message_type_e;
 
 /*******************************************************************************
@@ -46,4 +44,9 @@ bool can_bus_message_handler__send_test(void);
 
 void can_bus_message_handler__manage_mia_10Hz(void);
 
-void can_bus_message_handler__handle_all_incoming_messages(void);
+void can_bus_message_handler__transmit_messages_10Hz(void);
+
+void can_bus_message_handler__handle_all_incoming_messages_10Hz(void);
+
+bool dbc_send_can_message(void *argument_from_dbc_encode_and_send, uint32_t message_id, const uint8_t bytes[8],
+                          uint8_t dlc);
