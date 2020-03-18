@@ -3,6 +3,7 @@ try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
+import re
 import os
 import sys
 
@@ -360,8 +361,8 @@ class CodeWriter(object):
             # When using MIN_OF/MAX_OF macros, we need to use 'f' notation to explicitly use float rather than double
             minimum = str(signal.minimum) + 'f' if signal_is_float else str(signal.minimum)
             maximum = str(signal.maximum) + 'f' if signal_is_float else str(signal.maximum)
-            minimum = minimum.replace("0f", "0.0f")
-            maximum = maximum.replace("0f", "0.0f")
+            minimum = re.sub(r'(?<!\.)0f$', '0.0f', minimum)
+            maximum = re.sub(r'(?<!\.)0f$', '0.0f', maximum)
 
             raw_sig_code = "  {0} = ((uint64_t)(((MAX_OF(MIN_OF({1}message->{2},{3}),{4}) - ({5})) / {6}f) + 0.5f))".format(
                 raw_sig_name, cast, signal.name, maximum, minimum, signal.offset, signal.scale
