@@ -3,7 +3,7 @@
 #include "Mockboard_io.h"
 #include "Mockcan_bus.h"
 #include "Mockgpio.h"
-#include "Mockultrasonic.h"
+#include "Mockultrasonic_implementation.h"
 
 #include "tesla_model_rc.h"
 
@@ -19,8 +19,7 @@ void setUp(void) {
 void tearDown(void) {}
 
 void test_sensor_node__init(void) {
-  ultrasonic_s ultrasonic = {0};
-  ultrasonic__initialize_Expect(&ultrasonic, GPIO__PORT_0, 7, GPIO__PORT_0, 6);
+  ultrasonic_implementation__initialize_Expect();
 
   sensor_node__init();
 }
@@ -29,9 +28,10 @@ void test_sensor_node__send_messages_over_can_succesfully(void) {
   dbc_SENSOR_SONARS_s sensor_struct = {0};
   sensor_node__is_sync = true;
 
-  for (size_t number_of_ultrasonics = 0; number_of_ultrasonics < 4; number_of_ultrasonics++) {
-    ultrasonic__get_fake_range_ExpectAndReturn(0);
-  }
+  ultrasonic_implementation__get_left_ultrasonic_distance_in_ExpectAndReturn(0);
+  ultrasonic_implementation__get_right_ultrasonic_distance_in_ExpectAndReturn(0);
+  ultrasonic_implementation__get_front_ultrasonic_distance_in_ExpectAndReturn(0);
+  ultrasonic_implementation__get_back_ultrasonic_distance_in_ExpectAndReturn(0);
   can__tx_ExpectAndReturn(can1, NULL, 0, true);
   can__tx_IgnoreArg_can_message_ptr();
 
@@ -42,9 +42,10 @@ void test_sensor_node__send_messages_over_can_fail(void) {
   dbc_SENSOR_SONARS_s sensor_struct = {0};
   sensor_node__is_sync = true;
 
-  for (size_t number_of_ultrasonics = 0; number_of_ultrasonics < 4; number_of_ultrasonics++) {
-    ultrasonic__get_fake_range_ExpectAndReturn(0);
-  }
+  ultrasonic_implementation__get_left_ultrasonic_distance_in_ExpectAndReturn(0);
+  ultrasonic_implementation__get_right_ultrasonic_distance_in_ExpectAndReturn(0);
+  ultrasonic_implementation__get_front_ultrasonic_distance_in_ExpectAndReturn(0);
+  ultrasonic_implementation__get_back_ultrasonic_distance_in_ExpectAndReturn(0);
   can__tx_ExpectAndReturn(can1, NULL, 0, false);
   can__tx_IgnoreArg_can_message_ptr();
 
@@ -99,4 +100,9 @@ void test_sensor_node__handle_multiple_driver_heartbeat_messages_over_can(void) 
   can__rx_IgnoreArg_can_message_ptr();
 
   sensor_node__handle_messages_over_can();
+}
+
+void test_sensor_node__collect_data(void) {
+  ultrasonic_implementation__initiate_ultrasonics_range_Expect();
+  sensor_node__collect_data();
 }

@@ -25,3 +25,9 @@ void test_can_bus_handler__handle_all_incoming_messages_10hz(void) {
 
   can_bus_handler__handle_all_incoming_messages_10hz();
 }
+
+void test_can_bus_handler__collect_data_10hz(void) {
+  sensor_node__collect_data_Expect();
+
+  can_bus_handler__collect_data_10hz();
+}

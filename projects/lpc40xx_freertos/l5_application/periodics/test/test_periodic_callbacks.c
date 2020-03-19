@@ -31,6 +31,7 @@ void test__periodic_callbacks__1Hz(void) {
 }
 
 void test__periodic_callbacks__10Hz(void) {
+  can_bus_handler__collect_data_10hz_Expect();
   can_bus_handler__handle_all_incoming_messages_10hz_Expect();
   can_bus_handler__manage_mia_10hz_Expect();
   can_bus_handler__transmit_messages_10hz_Expect();

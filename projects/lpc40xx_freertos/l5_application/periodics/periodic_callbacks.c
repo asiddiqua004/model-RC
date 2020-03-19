@@ -1,8 +1,5 @@
 #include "periodic_callbacks.h"
 
-#include "board_io.h"
-#include "gpio.h"
-
 #include "can_bus_handler.h"
 #include "can_bus_initializer.h"
 
@@ -19,8 +16,7 @@ void periodic_callbacks__initialize(void) {
 void periodic_callbacks__1Hz(uint32_t callback_count) { can_bus__handle_bus_off(); }
 
 void periodic_callbacks__10Hz(uint32_t callback_count) {
-  // sensor_node__collect_ultrasonic_data();
-  // sensor_node__print_ultrasonic_data();
+  can_bus_handler__collect_data_10hz();
   can_bus_handler__handle_all_incoming_messages_10hz();
   can_bus_handler__manage_mia_10hz();
   can_bus_handler__transmit_messages_10hz();
