@@ -16,7 +16,7 @@
  *
  ******************************************************************************/
 
-static dbc_DRIVER_MOTOR_CONTROL_s can_msg_driver_motor_control = {0U};
+static dbc_DRIVER_MOTOR_CONTROL_s can_msg_driver_motor_control;
 
 /*******************************************************************************
  *
@@ -59,10 +59,10 @@ void can_bus_message_handler__handle_all_incoming_messages_10Hz(void) {
         .message_id = incoming_message.msg_id,
         .message_dlc = incoming_message.frame_fields.data_len,
     };
-    gpio__set(board_io__get_led0());
 
     if (dbc_decode_DRIVER_MOTOR_CONTROL(&can_msg_driver_motor_control, header, incoming_message.data.bytes)) {
       motor_control__update_speed_and_steering(&can_msg_driver_motor_control);
+      gpio__set(board_io__get_led0());
     }
   }
 }

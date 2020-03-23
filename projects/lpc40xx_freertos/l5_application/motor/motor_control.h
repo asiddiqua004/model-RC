@@ -1,9 +1,5 @@
 #pragma once
 
-#include <stdbool.h>
-
-#include "can_bus.h"
-#include "pwm1.h"
 #include "tesla_model_rc.h"
 
 /*******************************************************************************

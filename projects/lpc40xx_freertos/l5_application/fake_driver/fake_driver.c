@@ -4,11 +4,10 @@
 #define DRIVER_NODE 0
 #endif
 
-#include <stdio.h>
-
+#include "fake_driver.h"
 #include "can_bus.h"
 #include "can_bus_message_handler.h"
-#include "fake_driver.h"
+#include "tesla_model_rc.h"
 
 /*******************************************************************************
  *
@@ -36,9 +35,13 @@ static dbc_DRIVER_MOTOR_CONTROL_s driver_motor_control_message = {0};
 
 #if DRIVER_NODE == 1
 bool fake_driver__transmit_motor_messages_10Hz(void) {
-
   bool sent_motor_message_success = false;
+  fake_driver__compute_control_signals();
+  sent_motor_message_success = dbc_encode_and_send_DRIVER_MOTOR_CONTROL(NULL, &driver_motor_control_message);
+  return sent_motor_message_success;
+}
 
+void fake_driver__compute_control_signals(void) {
   if (increase_speed) {
     if ((driver_motor_control_message.DRIVER_MOTOR_CONTROL_SPEED_KPH + 1.0f > 10.0f)) {
       increase_speed = false;
@@ -66,8 +69,5 @@ bool fake_driver__transmit_motor_messages_10Hz(void) {
       driver_motor_control_message.DRIVER_MOTOR_CONTROL_STEER -= 0.1f;
     }
   }
-  sent_motor_message_success = dbc_encode_and_send_DRIVER_MOTOR_CONTROL(NULL, &driver_motor_control_message);
-
-  return sent_motor_message_success;
 }
 #endif
