@@ -66,8 +66,6 @@ void test_motor_control__initialize(void) {
   pwm1__init_single_edge_Expect(100U);
   gpio__construct_with_function_ExpectAndReturn(GPIO__PORT_2, 0, GPIO__FUNCTION_1, gpio);
   gpio__construct_with_function_ExpectAndReturn(GPIO__PORT_2, 4, GPIO__FUNCTION_1, gpio);
-  gpio__set_as_output_Expect(gpio);
-  gpio__set_as_output_Expect(gpio);
   gpio__construct_as_output_ExpectAndReturn(GPIO__PORT_2, 1, gpio);
   gpio__construct_as_output_ExpectAndReturn(GPIO__PORT_2, 2, gpio);
   motor_control__initialize();

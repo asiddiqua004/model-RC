@@ -4,11 +4,11 @@
 #define MOTOR_NODE 0
 #endif
 
-#include <stdbool.h>
-
+#include "motor_control.h"
+#include "can_bus.h"
 #include "can_bus_message_handler.h"
 #include "gpio.h"
-#include "motor_control.h"
+#include "pwm1.h"
 
 /*******************************************************************************
  *
@@ -64,8 +64,6 @@ void motor_control__initialize(void) {
   const gpio_s drive_motor_enable_a_pwm = gpio__construct_with_function(GPIO__PORT_2, 0, GPIO__FUNCTION_1); // PWM1_2_0
   const gpio_s steering_pwm = gpio__construct_with_function(GPIO__PORT_2, 4, GPIO__FUNCTION_1);             // PWM1_2_4
 
-  gpio__set_as_output(drive_motor_enable_a_pwm);
-  gpio__set_as_output(steering_pwm);
   in1 = gpio__construct_as_output(GPIO__PORT_2, 1);
   in2 = gpio__construct_as_output(GPIO__PORT_2, 2);
 }

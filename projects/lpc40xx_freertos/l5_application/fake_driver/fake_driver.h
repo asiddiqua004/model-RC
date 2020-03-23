@@ -2,10 +2,6 @@
 
 #include <stdbool.h>
 
-#include "can_bus.h"
-#include "pwm1.h"
-#include "tesla_model_rc.h"
-
 /*******************************************************************************
  *
  *                               D E F I N E S
@@ -31,3 +27,4 @@
  ******************************************************************************/
 
 bool fake_driver__transmit_motor_messages_10Hz(void);
+void fake_driver__compute_control_signals(void);

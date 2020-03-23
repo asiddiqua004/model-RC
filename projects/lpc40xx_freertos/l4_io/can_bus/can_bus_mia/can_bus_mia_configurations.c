@@ -18,8 +18,7 @@ const uint32_t dbc_mia_threshold_SENSOR_SONARS = 3 * 50;
 
 const dbc_DRIVER_HEARTBEAT_s dbc_mia_replacement_DRIVER_HEARTBEAT;
 const dbc_MOTOR_HEARTBEAT_s dbc_mia_replacement_MOTOR_HEARTBEAT;
-const dbc_DRIVER_MOTOR_CONTROL_s dbc_mia_replacement_DRIVER_MOTOR_CONTROL = {.DRIVER_MOTOR_CONTROL_SPEED_KPH = 0.0f,
-                                                                             .DRIVER_MOTOR_CONTROL_STEER = 0.0f};
+const dbc_DRIVER_MOTOR_CONTROL_s dbc_mia_replacement_DRIVER_MOTOR_CONTROL;
 const dbc_SENSOR_SONARS_s dbc_mia_replacement_SENSOR_SONARS;
 
 /*******************************************************************************
