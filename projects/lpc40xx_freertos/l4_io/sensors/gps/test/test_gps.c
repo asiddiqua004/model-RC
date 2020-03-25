@@ -22,7 +22,7 @@
  ******************************************************************************/
 static const uart_e gps_uart_test = UART__3;
 static const size_t clock_rate_test = 96000000UL;
-static const size_t baud_rate_test = 38400U;
+static const size_t baud_rate_test = 9600U;
 
 #define UNUSED(x) (void)(x)
 /*****************************************************************************
@@ -70,6 +70,7 @@ static bool uart__get_stub_callback_negative(uart_e uart, char *input_byte, uint
     return false;
   } else {
     TEST_FAIL_MESSAGE("uart__get_stub_callback_negative called too many times");
+    return false;
   }
 }
 
@@ -83,18 +84,22 @@ static bool uart__get_stub_callback_positive(uart_e uart, char *input_byte, uint
     return false;
   } else {
     TEST_FAIL_MESSAGE("uart__get_stub_callback_positive called too many times");
+    return false;
   }
 }
 
 static void test_gps_init_setup(void) {
   QueueHandle_t rx_queue = NULL;
   QueueHandle_t tx_queue = NULL;
+
+  gpio_s gpio = {0U};
   clock__get_peripheral_clock_hz_ExpectAndReturn(clock_rate_test);
   uart__init_Expect(gps_uart_test, clock_rate_test, baud_rate_test);
+  gpio__construct_as_input_ExpectAndReturn(GPIO__PORT_4, 29, gpio);
+  gpio__construct_as_output_ExpectAndReturn(GPIO__PORT_4, 28, gpio);
   xQueueCreate_ExpectAndReturn(100U, sizeof(char), rx_queue);
   xQueueCreate_ExpectAndReturn(8U, sizeof(char), tx_queue);
   uart__enable_queues_ExpectAndReturn(gps_uart_test, rx_queue, tx_queue, true);
-  gpio_s gpio = {0U};
   gpio__construct_with_function_ExpectAndReturn(GPIO__PORT_4, 28U, GPIO__FUNCTION_2, gpio);
   gpio__construct_with_function_ExpectAndReturn(GPIO__PORT_4, 29U, GPIO__FUNCTION_2, gpio);
 }

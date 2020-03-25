@@ -32,7 +32,7 @@ NS_ :
 
 BS_:
 
-BU_: DBG DRIVER MOTOR SENSOR
+BU_: DBG DRIVER MOTOR SENSOR GEO BRIDGE
 
 
 BO_ 100 DRIVER_HEARTBEAT: 1 DRIVER
@@ -51,9 +51,18 @@ BO_ 103 SENSOR_SONARS: 5 SENSOR
  SG_ SENSOR_SONARS_FRONT : 20|10@1+ (1,0) [0|0] "inch" DRIVER
  SG_ SENSOR_SONARS_BACK : 30|10@1+ (1,0) [0|0] "inch" DRIVER
 
+BO_ 104 GEO_GPS_HEADINGS: 8 GEO
+ SG_ GEO_GPS_HEADINGS_CURRENT : 0|32@1+ (0.000001,0) [0|360] "degrees" DRIVER, BRIDGE
+ SG_ GEO_GPS_HEADINGS_DESTINATION : 32|32@1+ (0.000001,0) [0|360] "degrees" DRIVER, BRIDGE
+
+BO_ 105 BRIDGE_GPS_HEADINGS: 8 BRIDGE
+ SG_ BRIDGE_GPS_HEADINGS_LONGITUDE : 0|32@1- (0.000001, 0) [-360|360] "" GEO
+ SG_ BRIDGE_GPS_HEADINGS_LATITUDE : 32|32@1- (0.000001, 0) [-360|360] "" GEO
+
 CM_ BU_ DRIVER "The driver controller driving the car";
 CM_ BU_ MOTOR "The motor controller of the car";
 CM_ BU_ SENSOR "The sensor controller of the car";
+CM_ BU_ GEO "The geological controller of the car";
 CM_ BO_ 100 "Sync message used to synchronize the controllers";
 CM_ SG_ 100 DRIVER_HEARTBEAT_CMD "Heartbeat command from the driver";
 CM_ SG_ 101 MOTOR_HEARTBEAT_CMD "Heartbeat command from the motor";
@@ -68,8 +77,10 @@ BA_DEF_DEF_ "GenMsgCycleTime" 0;
 
 BA_ "GenMsgCycleTime" BO_ 100 1000;
 BA_ "GenMsgCycleTime" BO_ 101 1000;
-BA_ "GenMsgCycleTime" BO_ 102 50;
+BA_ "GenMsgCycleTime" BO_ 102 100;
 BA_ "GenMsgCycleTime" BO_ 103 50;
+BA_ "GenMsgCycleTime" BO_ 104 50;
+BA_ "GenMsgCycleTime" BO_ 105 100;
 BA_ "FieldType" SG_ 100 DRIVER_HEARTBEAT_CMD "DRIVER_HEARTBEAT_CMD";
 BA_ "FieldType" SG_ 101 MOTOR_HEARTBEAT_CMD "MOTOR_HEARTBEAT_CMD";
 

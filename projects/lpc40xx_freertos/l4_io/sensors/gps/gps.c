@@ -31,9 +31,13 @@ static gps_coordinates_t parsed_coordinates;
 
 static void gps__private_absorb_data(void) {
   char byte;
+  puts("line: ");
   while (uart__get(gps_uart, &byte, 0U)) {
     (void)line_buffer__add_byte(&line, byte);
+    printf("%c", byte);
   }
+  printf("\n");
+  fflush(stdout);
 }
 
 static bool gps__private_verify_nmea_checksum(const char *gps_line, size_t line_size) {
@@ -63,6 +67,7 @@ static void gps__private_handle_line(void) {
   const char *const delimiter = ",";
   while (line_buffer__remove_line(&line, gps_line, sizeof(gps_line)) &&
          gps__private_verify_nmea_checksum(gps_line, sizeof(gps_line))) {
+    printf("line: %s\n\n", gps_line);
     char latitude_direction = '\0';
     char longitude_direction = '\0';
     const char *token = strtok(gps_line, delimiter);
@@ -114,20 +119,23 @@ static void gps__private_handle_line(void) {
 
 void gps__init(void) {
   line_buffer__init(&line, line_buffer, sizeof(line_buffer));
-  uart__init(gps_uart, clock__get_peripheral_clock_hz(), 38400U);
+  uart__init(gps_uart, clock__get_peripheral_clock_hz(), 9600U);
+  (void)gpio__construct_as_input(GPIO__PORT_4, 29);
+  (void)gpio__construct_as_output(GPIO__PORT_4, 28);
   (void)gpio__construct_with_function(GPIO__PORT_4, 28U, GPIO__FUNCTION_2);
   (void)gpio__construct_with_function(GPIO__PORT_4, 29U, GPIO__FUNCTION_2);
 
   // RX queue should be sized such that can buffer data in UART driver until gps__run_once() is called
   // Note: Assuming 38400bps, we can get 4 chars per ms, and 40 chars per 10ms (100Hz)
-  const QueueHandle_t rxq_handle = xQueueCreate(100U, sizeof(char));
-  const QueueHandle_t txq_handle = xQueueCreate(8U, sizeof(char)); // We don't send anything to the GPS
+  QueueHandle_t rxq_handle = xQueueCreate(100U, sizeof(char));
+  QueueHandle_t txq_handle = xQueueCreate(8U, sizeof(char)); // We don't send anything to the GPS
   (void)uart__enable_queues(gps_uart, rxq_handle, txq_handle);
 }
 
 void gps__run_once(void) {
   gps__private_absorb_data();
   gps__private_handle_line();
+  printf("parsed coordinates: %f, %f\n", (double)parsed_coordinates.latitude, (double)parsed_coordinates.longitude);
 }
 
 gps_coordinates_t gps__get_coordinates(void) { return parsed_coordinates; }
