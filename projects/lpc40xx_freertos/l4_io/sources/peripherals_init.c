@@ -83,12 +83,12 @@ static void peripherals_init__uart0_init(void) {
 }
 
 static void peripherals_init__i2c_init(void) {
-  const uint32_t i2c_speed_hz = UINT32_C(400) * 1000;
+  const uint32_t i2c_speed_hz = UINT32_C(100) * 1000; // Changed from 400 KHz
   i2c__initialize(I2C__2, i2c_speed_hz, clock__get_peripheral_clock_hz());
 
   for (unsigned slave_address = 2; slave_address <= 254; slave_address += 2) {
     if (i2c__detect(I2C__2, slave_address)) {
-      printf("I2C slave detected at address: 0x%02X\n", slave_address);
+      printf("I2C2 slave detected at address: 0x%02X\n", slave_address);
     }
   }
 }
