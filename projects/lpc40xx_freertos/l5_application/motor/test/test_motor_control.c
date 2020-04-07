@@ -2,9 +2,12 @@
 #include "unity.h"
 
 // Mocks
+#include "Mockcan_bus.h"
 #include "Mockcan_bus_message_handler.h"
 #include "Mockgpio.h"
+#include "Mockgpio_lab.h"
 #include "Mockpwm1.h"
+#include "Mocksys_time.h"
 
 // Module includes
 #include "motor_control.c"
