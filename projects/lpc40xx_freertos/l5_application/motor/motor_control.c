@@ -83,8 +83,8 @@ static void motor_control__private_handle_rotor(void) {
     gpiolab__enable_interrupts();
     latest_calculated_ground_speed_km_per_hour = average_speed_kilometers_per_hour;
     motor_control__private_send_current_speed();
+    previous_rotor_check_time_ms = current_rotor_check_time_ms;
   }
-  previous_rotor_check_time_ms = current_rotor_check_time_ms;
 }
 
 static void rotor_callback(void) { rotor_tick_count++; }

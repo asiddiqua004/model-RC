@@ -71,6 +71,8 @@ void test_motor_control__initialize(void) {
   gpio__construct_with_function_ExpectAndReturn(GPIO__PORT_2, 4, GPIO__FUNCTION_1, gpio);
   gpio__construct_as_output_ExpectAndReturn(GPIO__PORT_2, 1, gpio);
   gpio__construct_as_output_ExpectAndReturn(GPIO__PORT_2, 2, gpio);
+  gpiolab__attach_interrupt_Expect(GPIO_0, PIN_22, GPIO_INTR__RISING_EDGE, rotor_callback);
+  gpiolab__enable_interrupts_Expect();
   motor_control__initialize();
 }
 
@@ -125,4 +127,20 @@ void test_motor_control__update_speed_and_steering(void) {
   motor_control__update_speed_and_steering(&message);
   TEST_ASSERT_EQUAL_FLOAT(0.0f, motor_control_state.current_speed_kph_mapped);
   TEST_ASSERT_EQUAL_FLOAT(0.0f, motor_control_state.current_steer_degrees_mapped);
+}
+
+void test_motor_control__private_handle_rotor(void) {
+  rotor_tick_count = 1768;
+  TEST_ASSERT_EQUAL_FLOAT(0.0f, latest_calculated_ground_speed_km_per_hour);
+  sys_time__get_uptime_ms_ExpectAndReturn(500U);
+  TEST_ASSERT_EQUAL(0U, previous_rotor_check_time_ms);
+  motor_control__private_handle_rotor();
+
+  sys_time__get_uptime_ms_ExpectAndReturn(previous_rotor_check_time_ms + 1000U);
+  gpiolab__disable_interrupts_Expect();
+  gpiolab__enable_interrupts_Expect();
+  dbc_send_can_message_ExpectAnyArgsAndReturn(true);
+  motor_control__private_handle_rotor();
+  TEST_ASSERT_EQUAL(0U, rotor_tick_count);
+  TEST_ASSERT_EQUAL_FLOAT(0.9997805f, latest_calculated_ground_speed_km_per_hour);
 }
