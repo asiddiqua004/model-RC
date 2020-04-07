@@ -8,11 +8,15 @@
 
 #include "tesla_model_rc.h"
 #include "ultrasonic_implementation.h"
+#include "wifi_implementation.h"
 
 static bool sensor_node__is_sync = false;
 static dbc_DRIVER_HEARTBEAT_s can_msg__driver_heartbeat = {0};
 
-void sensor_node__init(void) { ultrasonic_implementation__initialize(); }
+void sensor_node__init(void) {
+  wifi_implementation__initialize();
+  ultrasonic_implementation__initialize();
+}
 
 static bool sensor_node__construct_and_send_gps_headings_data(void) {
   dbc_BRIDGE_SENSOR_GPS_HEADINGS_s gps_headings_struct = {0};
@@ -25,13 +29,13 @@ static bool sensor_node__construct_and_send_gps_headings_data(void) {
 }
 
 static bool sensor_node__construct_and_send_vehicle_navigation_state_data(void) {
-  dbc_BRIDGE_SENSOR_VEHICLE_NAVIGATION_STATE_s vehicale_navigation_state_struct = {0};
+  dbc_BRIDGE_SENSOR_VEHICLE_NAVIGATION_STATE_s vehicle_navigation_state_struct = {0};
 
   // TODO: Create state module based on ESP8266 parsing
-  vehicale_navigation_state_struct.BRIDGE_SENSOR_VEHICLE_NAVIGATION_STATE =
+  vehicle_navigation_state_struct.BRIDGE_SENSOR_VEHICLE_NAVIGATION_STATE =
       BRIDGE_SENSOR_VEHICLE_NAVIGATION_STATE_NAVIGATE;
 
-  return dbc_encode_and_send_BRIDGE_SENSOR_VEHICLE_NAVIGATION_STATE(NULL, &vehicale_navigation_state_struct);
+  return dbc_encode_and_send_BRIDGE_SENSOR_VEHICLE_NAVIGATION_STATE(NULL, &vehicle_navigation_state_struct);
 }
 
 static bool sensor_node__construct_and_send_voltage_data(void) {
@@ -103,4 +107,11 @@ void sensor_node__handle_messages_over_can(void) {
   }
 }
 
+void sensor_node__handle_wifi_transmissions(void) {
+  wifi_implementation__fill_line_buffer();
+  wifi_implementation__handle_line();
+}
+
 void sensor_node__collect_data(void) { ultrasonic_implementation__initiate_ultrasonics_range(); }
+
+void sensor_node__test(void) { wifi_implementation__polled_test_echo(); }

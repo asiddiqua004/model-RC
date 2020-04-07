@@ -4,6 +4,7 @@
 #include "Mockcan_bus.h"
 #include "Mockgpio.h"
 #include "Mockultrasonic_implementation.h"
+#include "Mockwifi_implementation.h"
 
 #include "tesla_model_rc.h"
 
@@ -19,6 +20,7 @@ void setUp(void) {
 void tearDown(void) {}
 
 void test_sensor_node__init(void) {
+  wifi_implementation__initialize_Expect();
   ultrasonic_implementation__initialize_Expect();
 
   sensor_node__init();

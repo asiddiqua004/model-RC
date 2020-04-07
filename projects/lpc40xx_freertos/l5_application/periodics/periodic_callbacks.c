@@ -13,7 +13,10 @@ void periodic_callbacks__initialize(void) {
   can_bus_handler__init();
 }
 
-void periodic_callbacks__1Hz(uint32_t callback_count) { can_bus__handle_bus_off(); }
+void periodic_callbacks__1Hz(uint32_t callback_count) {
+  can_bus__handle_bus_off();
+  can_bus_handler__transmit_messages_1hz();
+}
 
 void periodic_callbacks__10Hz(uint32_t callback_count) {
   can_bus_handler__collect_data_10hz();

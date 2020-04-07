@@ -26,6 +26,7 @@ void test__periodic_callbacks__initialize(void) {
 
 void test__periodic_callbacks__1Hz(void) {
   can_bus__handle_bus_off_Expect();
+  can_bus_handler__transmit_messages_1hz_Expect();
 
   periodic_callbacks__1Hz(0);
 }
