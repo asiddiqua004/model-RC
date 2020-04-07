@@ -14,22 +14,54 @@ static dbc_DRIVER_HEARTBEAT_s can_msg__driver_heartbeat = {0};
 
 void sensor_node__init(void) { ultrasonic_implementation__initialize(); }
 
-static bool sensor_node__construct_and_send_ultrasonic_data(void) {
-  dbc_SENSOR_SONARS_s sensor_sonar_struct = {0};
+static bool sensor_node__construct_and_send_gps_headings_data(void) {
+  dbc_BRIDGE_SENSOR_GPS_HEADINGS_s gps_headings_struct = {0};
 
-  sensor_sonar_struct.SENSOR_SONARS_LEFT = ultrasonic_implementation__get_left_ultrasonic_distance_in();
-  sensor_sonar_struct.SENSOR_SONARS_RIGHT = ultrasonic_implementation__get_right_ultrasonic_distance_in();
-  sensor_sonar_struct.SENSOR_SONARS_FRONT = ultrasonic_implementation__get_front_ultrasonic_distance_in();
-  sensor_sonar_struct.SENSOR_SONARS_BACK = ultrasonic_implementation__get_back_ultrasonic_distance_in();
+  // TODO: Create GPS headings module based on ESP8266 parsing
+  gps_headings_struct.BRIDGE_SENSOR_GPS_HEADINGS_LONGITUDE = 1.0;
+  gps_headings_struct.BRIDGE_SENSOR_GPS_HEADINGS_LATITUDE = 2.0;
 
-  return dbc_encode_and_send_SENSOR_SONARS(NULL, &sensor_sonar_struct);
+  return dbc_encode_and_send_BRIDGE_SENSOR_GPS_HEADINGS(NULL, &gps_headings_struct);
+}
+
+static bool sensor_node__construct_and_send_vehicle_navigation_state_data(void) {
+  dbc_BRIDGE_SENSOR_VEHICLE_NAVIGATION_STATE_s vehicale_navigation_state_struct = {0};
+
+  // TODO: Create state module based on ESP8266 parsing
+  vehicale_navigation_state_struct.BRIDGE_SENSOR_VEHICLE_NAVIGATION_STATE =
+      BRIDGE_SENSOR_VEHICLE_NAVIGATION_STATE_NAVIGATE;
+
+  return dbc_encode_and_send_BRIDGE_SENSOR_VEHICLE_NAVIGATION_STATE(NULL, &vehicale_navigation_state_struct);
+}
+
+static bool sensor_node__construct_and_send_voltage_data(void) {
+  dbc_BRIDGE_SENSOR_VOLTAGE_s voltage_struct = {0};
+
+  // TODO: Create ADC and read voltage input from battery
+  voltage_struct.BRIDGE_SENSOR_VOLTAGE = 3.0;
+
+  return dbc_encode_and_send_BRIDGE_SENSOR_VOLTAGE(NULL, &voltage_struct);
+}
+
+static bool sensor_node__construct_and_send_sonars_data(void) {
+  dbc_BRIDGE_SENSOR_SONARS_s sonars_struct = {0};
+
+  sonars_struct.BRIDGE_SENSOR_SONARS_LEFT = ultrasonic_implementation__get_left_ultrasonic_distance_in();
+  sonars_struct.BRIDGE_SENSOR_SONARS_RIGHT = ultrasonic_implementation__get_right_ultrasonic_distance_in();
+  sonars_struct.BRIDGE_SENSOR_SONARS_FRONT = ultrasonic_implementation__get_front_ultrasonic_distance_in();
+  sonars_struct.BRIDGE_SENSOR_SONARS_BACK = ultrasonic_implementation__get_back_ultrasonic_distance_in();
+
+  return dbc_encode_and_send_BRIDGE_SENSOR_SONARS(NULL, &sonars_struct);
 }
 
 bool sensor_node__send_messages_over_can(void) {
   bool sent_all_messages = false;
 
   if (sensor_node__is_sync) {
-    sent_all_messages = sensor_node__construct_and_send_ultrasonic_data();
+    sent_all_messages = sensor_node__construct_and_send_gps_headings_data();
+    sent_all_messages = sensor_node__construct_and_send_vehicle_navigation_state_data();
+    sent_all_messages = sensor_node__construct_and_send_voltage_data();
+    sent_all_messages = sensor_node__construct_and_send_sonars_data();
   }
 
   return sent_all_messages;

@@ -25,9 +25,21 @@ void test_sensor_node__init(void) {
 }
 
 void test_sensor_node__send_messages_over_can_succesfully(void) {
-  dbc_SENSOR_SONARS_s sensor_struct = {0};
   sensor_node__is_sync = true;
 
+  // gps headings message
+  can__tx_ExpectAndReturn(can1, NULL, 0, true);
+  can__tx_IgnoreArg_can_message_ptr();
+
+  // vehicale navigation state message
+  can__tx_ExpectAndReturn(can1, NULL, 0, true);
+  can__tx_IgnoreArg_can_message_ptr();
+
+  // voltage message
+  can__tx_ExpectAndReturn(can1, NULL, 0, true);
+  can__tx_IgnoreArg_can_message_ptr();
+
+  // ultrasonics message
   ultrasonic_implementation__get_left_ultrasonic_distance_in_ExpectAndReturn(0);
   ultrasonic_implementation__get_right_ultrasonic_distance_in_ExpectAndReturn(0);
   ultrasonic_implementation__get_front_ultrasonic_distance_in_ExpectAndReturn(0);
@@ -39,9 +51,21 @@ void test_sensor_node__send_messages_over_can_succesfully(void) {
 }
 
 void test_sensor_node__send_messages_over_can_fail(void) {
-  dbc_SENSOR_SONARS_s sensor_struct = {0};
   sensor_node__is_sync = true;
 
+  // gps headings message
+  can__tx_ExpectAndReturn(can1, NULL, 0, false);
+  can__tx_IgnoreArg_can_message_ptr();
+
+  // vehicale navigation state message
+  can__tx_ExpectAndReturn(can1, NULL, 0, false);
+  can__tx_IgnoreArg_can_message_ptr();
+
+  // voltage message
+  can__tx_ExpectAndReturn(can1, NULL, 0, false);
+  can__tx_IgnoreArg_can_message_ptr();
+
+  // ultrasonics message
   ultrasonic_implementation__get_left_ultrasonic_distance_in_ExpectAndReturn(0);
   ultrasonic_implementation__get_right_ultrasonic_distance_in_ExpectAndReturn(0);
   ultrasonic_implementation__get_front_ultrasonic_distance_in_ExpectAndReturn(0);
@@ -53,8 +77,6 @@ void test_sensor_node__send_messages_over_can_fail(void) {
 }
 
 void test_sensor_node__send_messages_over_can_sync_fail(void) {
-  dbc_SENSOR_SONARS_s sensor_struct = {0};
-
   TEST_ASSERT_FALSE(sensor_node__send_messages_over_can());
 }
 
