@@ -28,7 +28,7 @@ void test_can_bus_handler__manage_mia_10Hz(void) {
 }
 
 void test_can_bus_handler__handle_all_incoming_messages_10Hz(void) {
-  sensor_node__handle_wifi_transmissions_Expect();
+  sensor_node__handle_wifi_lines_Expect();
   sensor_node__handle_messages_over_can_Expect();
 
   can_bus_handler__handle_all_incoming_messages_10Hz();
@@ -38,4 +38,10 @@ void test_can_bus_handler__collect_data_20Hz(void) {
   sensor_node__collect_data_Expect();
 
   can_bus_handler__collect_data_20Hz();
+}
+
+void test_can_bus_handler__handle_wifi_transmissions_100Hz(void) {
+  sensor_node__handle_wifi_transmissions_Expect();
+
+  can_bus_handler__handle_wifi_transmissions_100Hz();
 }

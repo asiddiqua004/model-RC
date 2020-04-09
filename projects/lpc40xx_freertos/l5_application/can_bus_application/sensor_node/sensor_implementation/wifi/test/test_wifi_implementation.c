@@ -30,7 +30,6 @@ void test_wifi_implementation__handle_line(void) {
 
   char line[32] = {0};
   line_buffer__remove_line_ExpectAndReturn(&wifi_line_buffer, line, sizeof(line), true);
-  uart_printf_ExpectAndReturn(UART__0, "line found: %s\n", true);
 
   line_buffer__remove_line_ExpectAndReturn(&wifi_line_buffer, line, sizeof(line), false);
 

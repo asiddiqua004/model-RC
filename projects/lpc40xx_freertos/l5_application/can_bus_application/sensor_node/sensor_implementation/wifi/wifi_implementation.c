@@ -50,7 +50,7 @@ void wifi_implementation__polled_test_echo(void) {
   }
 
   if (rcv_count) {
-    uart_printf(UART__0, "ECHO: %s", rcv_buffer);
+    printf("ECHO: %s", rcv_buffer);
   }
 }
 
@@ -65,7 +65,7 @@ void wifi_implementation__handle_line(void) {
   if (line_buffer__get_item_count(&wifi_line_buffer)) {
     char line[32] = {0};
     while (line_buffer__remove_line(&wifi_line_buffer, line, sizeof(line))) {
-      uart_printf(UART__0, "line found: %s\n", line);
+      printf("line found: %s\n", line);
     }
   }
 }

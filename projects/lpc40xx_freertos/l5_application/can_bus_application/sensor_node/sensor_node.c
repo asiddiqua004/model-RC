@@ -104,10 +104,9 @@ void sensor_node__handle_messages_over_can(void) {
   }
 }
 
-void sensor_node__handle_wifi_transmissions(void) {
-  wifi_implementation__fill_line_buffer();
-  wifi_implementation__handle_line();
-}
+void sensor_node__handle_wifi_transmissions(void) { wifi_implementation__fill_line_buffer(); }
+
+void sensor_node__handle_wifi_lines(void) { wifi_implementation__handle_line(); }
 
 void sensor_node__collect_data(void) { ultrasonic_implementation__initiate_ultrasonics_range(); }
 
