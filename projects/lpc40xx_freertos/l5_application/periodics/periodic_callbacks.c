@@ -15,17 +15,20 @@ void periodic_callbacks__initialize(void) {
 
 void periodic_callbacks__1Hz(uint32_t callback_count) {
   can_bus__handle_bus_off();
-  can_bus_handler__transmit_messages_1hz();
+  can_bus_handler__transmit_messages_1Hz();
 }
 
 void periodic_callbacks__10Hz(uint32_t callback_count) {
-  can_bus_handler__collect_data_10hz();
-  can_bus_handler__handle_all_incoming_messages_10hz();
-  can_bus_handler__manage_mia_10hz();
-  can_bus_handler__transmit_messages_10hz();
+  can_bus_handler__handle_all_incoming_messages_10Hz();
+  can_bus_handler__manage_mia_10Hz();
+  can_bus_handler__transmit_messages_10Hz();
 }
 
-void periodic_callbacks__100Hz(uint32_t callback_count) {}
+void periodic_callbacks__100Hz(uint32_t callback_count) {
+  if (callback_count % 5 == 0) { // 20 Hz @ (10 ms * 5) = 50 ms
+    can_bus_handler__collect_data_20Hz();
+  }
+}
 
 /**
  * @warning

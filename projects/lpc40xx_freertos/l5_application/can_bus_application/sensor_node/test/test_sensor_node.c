@@ -14,7 +14,7 @@
 
 void setUp(void) {
   sensor_node__is_sync = false;
-  memset(&can_msg__driver_heartbeat, 0, sizeof(can_msg__driver_heartbeat));
+  memset(&can_msg_driver_heartbeat, 0, sizeof(can_msg_driver_heartbeat));
 }
 
 void tearDown(void) {}
@@ -86,13 +86,14 @@ void test_sensor_node__handle_mia(void) {
   gpio_s gpio = {0};
 
   // First 10 Hz cycle is pass by
-  sensor_node__handle_mia();
+  const uint32_t mia_increment_counter = 100;
+  sensor_node__handle_mia(mia_increment_counter);
 
   board_io__get_led0_ExpectAndReturn(gpio);
   gpio__set_Expect(gpio);
 
   // Second 10 Hz cycle triggers prints and gpio toggle
-  sensor_node__handle_mia();
+  sensor_node__handle_mia(mia_increment_counter);
 }
 
 void test_sensor_node__handle_multiple_driver_heartbeat_messages_over_can(void) {

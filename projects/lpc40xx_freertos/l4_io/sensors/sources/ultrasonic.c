@@ -17,7 +17,7 @@
   pulse signal back.
   (3) IF the signal back, through high level , time of high output IO duration is
   the time from sending ultrasonic to returning.
-  Test distance = (Time from pulse until Echo rising-to-falling edge × velocity of sound (340M/S) / 2,
+  Test distance = (Time from pulse until Echo rising-to-falling edge ï¿½ velocity of sound (340M/S) / 2,
 
   Conversion to inches:
   time * Speed of Sound / 2 = time * (13503.9 in/s / 1000000 us) / 2 = time * 0.00675195 in/us = time / 148.105
@@ -36,7 +36,7 @@ void ultrasonic__initialize(ultrasonic_s *ultrasonic, gpio__port_e trigger_port,
                             gpio__port_e echo_port, uint8_t echo_pin_number_0_to_31) {
   ultrasonic->trigger_out = gpio__construct_as_output(trigger_port, trigger_pin_number_0_to_31);
   ultrasonic->echo_in = gpio__construct_as_input(echo_port, echo_pin_number_0_to_31);
-  ultrasonic->distance_us = 0U;
+  ultrasonic->time_of_flight_us = 0U;
   ultrasonic->last_trigger_time_us = 0U;
   ultrasonic->start_new_reading = true;
 
@@ -63,9 +63,9 @@ void ultrasonic__get_range_blocking(ultrasonic_s *ultrasonic) {
         echo_rising_edge_found = true;
         echo_high_trigger_time_us = sys_time__get_uptime_us() - ultrasonic->last_trigger_time_us;
       } else {
-        if (echo_rising_edge_found) {                          // Echo was sampled high and deasserted
-          ultrasonic->distance_us = echo_high_trigger_time_us; // Divide by 148U for inch conversion
-          break;                                               // Exit when echo falling edge detected
+        if (echo_rising_edge_found) {                                // Echo was sampled high and deasserted
+          ultrasonic->time_of_flight_us = echo_high_trigger_time_us; // Divide by 148U for inch conversion
+          break;                                                     // Exit when echo falling edge detected
         }
       }
 

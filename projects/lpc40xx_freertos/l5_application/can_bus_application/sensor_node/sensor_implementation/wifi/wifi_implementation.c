@@ -9,9 +9,9 @@
 #include "uart_printf.h"
 
 static line_buffer_s wifi_line_buffer;
-static uint8_t wifi_line_buffer_memory[128];
 
 void wifi_implementation__initialize(void) {
+  static uint8_t wifi_line_buffer_memory[128];
   line_buffer__init(&wifi_line_buffer, wifi_line_buffer_memory, sizeof(wifi_line_buffer_memory));
 
   gpio__construct_with_function(GPIO__PORT_4, 28, GPIO__FUNCTION_2); // P4.28 - UART-3 Tx
@@ -56,7 +56,7 @@ void wifi_implementation__polled_test_echo(void) {
 
 void wifi_implementation__fill_line_buffer(void) {
   char byte = 0;
-  while (uart__get(UART__3, &byte, 1)) {
+  while (uart__get(UART__3, &byte, 0)) {
     line_buffer__add_byte(&wifi_line_buffer, byte);
   }
 }

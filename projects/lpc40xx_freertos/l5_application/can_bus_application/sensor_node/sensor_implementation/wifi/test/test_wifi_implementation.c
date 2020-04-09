@@ -18,9 +18,9 @@ void tearDown(void) {}
 void test_wifi_implementation__fill_line_buffer(void) {
   char byte = 0;
 
-  uart__get_ExpectAndReturn(UART__3, &byte, 1, true);
+  uart__get_ExpectAndReturn(UART__3, &byte, 0, true);
   line_buffer__add_byte_ExpectAndReturn(&wifi_line_buffer, byte, true);
-  uart__get_ExpectAndReturn(UART__3, &byte, 1, false);
+  uart__get_ExpectAndReturn(UART__3, &byte, 0, false);
 
   wifi_implementation__fill_line_buffer();
 }

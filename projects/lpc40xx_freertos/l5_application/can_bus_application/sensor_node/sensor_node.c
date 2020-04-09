@@ -11,7 +11,7 @@
 #include "wifi_implementation.h"
 
 static bool sensor_node__is_sync = false;
-static dbc_DRIVER_HEARTBEAT_s can_msg__driver_heartbeat = {0};
+static dbc_DRIVER_HEARTBEAT_s can_msg_driver_heartbeat = {0};
 
 void sensor_node__init(void) {
   wifi_implementation__initialize();
@@ -71,11 +71,8 @@ bool sensor_node__send_messages_over_can(void) {
   return sent_all_messages;
 }
 
-void sensor_node__handle_mia(void) {
-  // We are in 10hz slot, so increment MIA counter by 100ms
-  const uint32_t mia_increment_value = 100;
-
-  if (dbc_service_mia_DRIVER_HEARTBEAT(&can_msg__driver_heartbeat, mia_increment_value)) {
+void sensor_node__handle_mia(const uint32_t mia_increment_value) {
+  if (dbc_service_mia_DRIVER_HEARTBEAT(&can_msg_driver_heartbeat, mia_increment_value)) {
     puts("driver missing\r\n");
     sensor_node__is_sync = false;
     gpio__set(board_io__get_led0());
@@ -84,7 +81,7 @@ void sensor_node__handle_mia(void) {
 
 static void sensor_node__handle_driver_heartbeat_message(const dbc_message_header_t *header,
                                                          const uint8_t can_msg_data_bytes[8]) {
-  if (dbc_decode_DRIVER_HEARTBEAT(&can_msg__driver_heartbeat, *header, can_msg_data_bytes)) {
+  if (dbc_decode_DRIVER_HEARTBEAT(&can_msg_driver_heartbeat, *header, can_msg_data_bytes)) {
     if (!sensor_node__is_sync) {
       puts("sensor sync\r\n");
       sensor_node__is_sync = true;

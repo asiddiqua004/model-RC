@@ -26,16 +26,21 @@ void test__periodic_callbacks__initialize(void) {
 
 void test__periodic_callbacks__1Hz(void) {
   can_bus__handle_bus_off_Expect();
-  can_bus_handler__transmit_messages_1hz_Expect();
+  can_bus_handler__transmit_messages_1Hz_Expect();
 
   periodic_callbacks__1Hz(0);
 }
 
 void test__periodic_callbacks__10Hz(void) {
-  can_bus_handler__collect_data_10hz_Expect();
-  can_bus_handler__handle_all_incoming_messages_10hz_Expect();
-  can_bus_handler__manage_mia_10hz_Expect();
-  can_bus_handler__transmit_messages_10hz_Expect();
+  can_bus_handler__handle_all_incoming_messages_10Hz_Expect();
+  can_bus_handler__manage_mia_10Hz_Expect();
+  can_bus_handler__transmit_messages_10Hz_Expect();
 
   periodic_callbacks__10Hz(0);
+}
+
+void test__periodic_callbacks__100Hz(void) {
+  can_bus_handler__collect_data_20Hz_Expect();
+
+  periodic_callbacks__100Hz(5);
 }
