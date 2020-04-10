@@ -5,10 +5,10 @@
 #include "Mockgpio.h"
 #include "Mockultrasonic_implementation.h"
 #include "Mockwifi_implementation.h"
-
-#include "tesla_model_rc.h"
+#include "Mockwifi_message_handler.h"
 
 #include "can_bus_mia_configurations.h"
+#include "tesla_model_rc.h"
 
 #include "sensor_node.c"
 
@@ -29,11 +29,14 @@ void test_sensor_node__init(void) {
 void test_sensor_node__send_messages_over_can_succesfully(void) {
   sensor_node__is_sync = true;
 
-  // gps headings message
+  // GPS headings message
+  wifi_message_handler__get_GPS_headings_longitude_ExpectAndReturn(0.0);
+  wifi_message_handler__get_GPS_headings_latitude_ExpectAndReturn(0.0);
   can__tx_ExpectAndReturn(can1, NULL, 0, true);
   can__tx_IgnoreArg_can_message_ptr();
 
-  // vehicale navigation state message
+  // vehicle navigation state message
+  wifi_message_handler__get_vehicle_navigation_state_ExpectAndReturn(0);
   can__tx_ExpectAndReturn(can1, NULL, 0, true);
   can__tx_IgnoreArg_can_message_ptr();
 
@@ -55,11 +58,14 @@ void test_sensor_node__send_messages_over_can_succesfully(void) {
 void test_sensor_node__send_messages_over_can_fail(void) {
   sensor_node__is_sync = true;
 
-  // gps headings message
+  // GPS headings message
+  wifi_message_handler__get_GPS_headings_longitude_ExpectAndReturn(0.0);
+  wifi_message_handler__get_GPS_headings_latitude_ExpectAndReturn(0.0);
   can__tx_ExpectAndReturn(can1, NULL, 0, false);
   can__tx_IgnoreArg_can_message_ptr();
 
-  // vehicale navigation state message
+  // vehicle navigation state message
+  wifi_message_handler__get_vehicle_navigation_state_ExpectAndReturn(0);
   can__tx_ExpectAndReturn(can1, NULL, 0, false);
   can__tx_IgnoreArg_can_message_ptr();
 

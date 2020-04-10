@@ -7,6 +7,7 @@
 
 #include "line_buffer.h"
 #include "uart_printf.h"
+#include "wifi_message_handler.h"
 
 static line_buffer_s wifi_line_buffer;
 
@@ -65,7 +66,7 @@ void wifi_implementation__handle_line(void) {
   if (line_buffer__get_item_count(&wifi_line_buffer)) {
     char line[32] = {0};
     while (line_buffer__remove_line(&wifi_line_buffer, line, sizeof(line))) {
-      printf("line found: %s\n", line);
+      wifi_message_handler__parse_line(line, strlen(line));
     }
   }
 }

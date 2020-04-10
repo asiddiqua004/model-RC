@@ -25,7 +25,7 @@ void periodic_callbacks__10Hz(uint32_t callback_count) {
 }
 
 void periodic_callbacks__100Hz(uint32_t callback_count) {
-  if (callback_count % 5 == 0) { // 20 Hz @ (10 ms * 5) = 50 ms
+  if (0 == (callback_count % 5)) { // 20 Hz @ (10 ms * 5) = 50 ms
     can_bus_handler__collect_data_20Hz();
   }
   can_bus_handler__handle_wifi_transmissions_100Hz();

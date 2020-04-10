@@ -9,6 +9,7 @@
 
 #include "Mockline_buffer.h"
 #include "Mockuart_printf.h"
+#include "Mockwifi_message_handler.h"
 
 #include "wifi_implementation.c"
 
@@ -27,8 +28,9 @@ void test_wifi_implementation__fill_line_buffer(void) {
 
 void test_wifi_implementation__handle_line(void) {
   line_buffer__get_item_count_ExpectAndReturn(&wifi_line_buffer, true);
-
   char line[32] = {0};
+
+  wifi_message_handler__parse_line_Expect(line, 0);
   line_buffer__remove_line_ExpectAndReturn(&wifi_line_buffer, line, sizeof(line), true);
 
   line_buffer__remove_line_ExpectAndReturn(&wifi_line_buffer, line, sizeof(line), false);
