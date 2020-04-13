@@ -27,16 +27,12 @@ void test_wifi_implementation__initialize(void) {
   clock__get_peripheral_clock_hz_ExpectAndReturn(0);
   uart__init_Expect(UART__3, 0, 74880);
 
-  // Memory for the queue data structure
-  StaticQueue_t rxq_struct;
-  StaticQueue_t txq_struct;
-
   // Make UART more efficient by backing it with RTOS queues (optional but highly recommended with RTOS)
-  xQueueCreateStatic_ExpectAndReturn(128, sizeof(char), NULL, &rxq_struct, NULL);
+  xQueueCreateStatic_ExpectAndReturn(128, sizeof(char), NULL, NULL, NULL);
   xQueueCreateStatic_IgnoreArg_pucQueueStorageBuffer();
   xQueueCreateStatic_IgnoreArg_pxQueueBuffer();
 
-  xQueueCreateStatic_ExpectAndReturn(32, sizeof(char), NULL, &txq_struct, NULL);
+  xQueueCreateStatic_ExpectAndReturn(32, sizeof(char), NULL, NULL, NULL);
   xQueueCreateStatic_IgnoreArg_pucQueueStorageBuffer();
   xQueueCreateStatic_IgnoreArg_pxQueueBuffer();
 
