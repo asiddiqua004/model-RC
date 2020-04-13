@@ -18,7 +18,6 @@ void wifi_implementation__initialize(void) {
   gpio__construct_with_function(GPIO__PORT_4, 28, GPIO__FUNCTION_2); // P4.28 - UART-3 Tx
   gpio__construct_with_function(GPIO__PORT_4, 29, GPIO__FUNCTION_2); // P4.29 - UART-3 Rx
 
-  // Note: PIN functions are initialized by board_io__initialize() for P4.28(Tx) and P4.29(Rx)
   uart__init(UART__3, clock__get_peripheral_clock_hz(), 74880);
 
   // You can use xQueueCreate() that uses malloc() as it is an easier API to work with, however, we opt to
@@ -29,14 +28,14 @@ void wifi_implementation__initialize(void) {
   static StaticQueue_t txq_struct;
 
   // Memory where the queue actually stores the data
-  static uint8_t rxq_storage[32];
-  static uint8_t txq_storage[128];
+  static uint8_t rxq_storage[128];
+  static uint8_t txq_storage[32];
 
   // Make UART more efficient by backing it with RTOS queues (optional but highly recommended with RTOS)
   QueueHandle_t rxq_handle = xQueueCreateStatic(sizeof(rxq_storage), sizeof(char), rxq_storage, &rxq_struct);
   QueueHandle_t txq_handle = xQueueCreateStatic(sizeof(txq_storage), sizeof(char), txq_storage, &txq_struct);
 
-  uart__enable_queues(UART__3, txq_handle, rxq_handle);
+  uart__enable_queues(UART__3, rxq_handle, txq_handle);
 }
 
 void wifi_implementation__polled_test_echo(void) {
