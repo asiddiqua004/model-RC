@@ -27,10 +27,14 @@ static const float motor_speed_maximum = 10.0f;
 static const float steering_angle_minimum = -2.0f;
 static const float steering_angle_maximum = 2.0f;
 
+static const float motor_speed_neutral = 8.9f;
+static const float motor_reverse_threshold = 8.5f;
 static const float motor_speed_minimum_mapped = 7.0f;
 static const float motor_speed_maximum_mapped = 9.5f;
 static const float steering_angle_minimum_mapped = 11.55f;
 static const float steering_angle_maximum_mapped = 6.5f;
+
+static const uint32_t motor_ecu_arm_timeout = 3000U;
 
 // static const float motor_speed_minimum_mapped = 0.0f;
 // static const float motor_speed_maximum_mapped = 100.0f;
@@ -110,9 +114,6 @@ void motor_control__initialize(void) {
   gpio__construct_with_function(GPIO__PORT_2, 0, GPIO__FUNCTION_1); // Motor PWM PWM1_2_0
   gpio__construct_with_function(GPIO__PORT_2, 4, GPIO__FUNCTION_1); // Steering PWM PWM1_2_4
 
-  // in1 = gpio__construct_as_output(GPIO__PORT_2, 1);
-  // in2 = gpio__construct_as_output(GPIO__PORT_2, 2);
-
   gpiolab__attach_interrupt(GPIO_0, PIN_22, GPIO_INTR__RISING_EDGE, rotor_callback);
   gpiolab__enable_interrupts();
 }
@@ -135,37 +136,28 @@ static bool forward;
 void motor_control__handle_speed(void) {
   const uint64_t current_time = sys_time__get_uptime_ms();
   if (0U == time_elapsed) {
-    pwm1__set_duty_cycle(pwm_channel_speed, 8.9f);
+    pwm1__set_duty_cycle(pwm_channel_speed, motor_speed_neutral);
     time_elapsed = current_time;
-  } else if (current_time - time_elapsed >= 3000U) {
-    if (motor_control_state.current_speed_kph_mapped == 8.9f) {
-      pwm1__set_duty_cycle(pwm_channel_speed, 8.9f);
-
+  } else if (current_time - time_elapsed >= motor_ecu_arm_timeout) {
+    if (motor_control_state.current_speed_kph_mapped == motor_speed_neutral) {
       // Stop Motor
-      // gpio__reset(in1);
-      // gpio__reset(in2);
+      pwm1__set_duty_cycle(pwm_channel_speed, motor_speed_neutral);
     } else {
-      if (forward && motor_control_state.current_speed_kph_mapped < 8.5f) {
-        pwm1__set_duty_cycle(pwm_channel_speed, 8.9f);
+      if (forward && motor_control_state.current_speed_kph_mapped < motor_reverse_threshold) {
+        pwm1__set_duty_cycle(pwm_channel_speed, motor_speed_neutral);
         forward = false;
         printf("==========================================\nHit Reverse Condition\n\n");
-      } else if (motor_control_state.current_speed_kph_mapped > 8.9f) {
+      } else if (motor_control_state.current_speed_kph_mapped > motor_speed_neutral) {
         pwm1__set_duty_cycle(pwm_channel_speed, motor_control_state.current_speed_kph_mapped);
         forward = true;
       } else {
         pwm1__set_duty_cycle(pwm_channel_speed, motor_control_state.current_speed_kph_mapped);
         printf("moving...%f\n", (double)motor_control_state.current_speed_kph_mapped);
       }
-      // Motor Forward or Backwards
-      // gpio__reset(in1);
-      // gpio__set(in2);
     }
   } else {
-    // time_elapsed = current_time;
   }
   printf("motor receiving speed: %f\n", (double)motor_control_state.current_speed_kph_mapped);
-  // printf("time elapsed %lu\n stopped? %u\n\n", (current_time - time_elapsed),
-  //        (motor_control_state.current_speed_kph_mapped == 0.0f));
   printf("direction :%s\n", forward ? "forward" : "reverse");
 }
 
