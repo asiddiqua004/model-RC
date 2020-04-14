@@ -50,3 +50,4 @@ void can_bus_message_handler__handle_all_incoming_messages_10Hz(void);
 
 bool dbc_send_can_message(void *argument_from_dbc_encode_and_send, uint32_t message_id, const uint8_t bytes[8],
                           uint8_t dlc);
+void can_bus_message_handler__transmit_messages_10Hz(void);
