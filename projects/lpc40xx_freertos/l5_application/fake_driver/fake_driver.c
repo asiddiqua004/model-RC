@@ -1,4 +1,4 @@
-// #define DRIVER_NODE 1
+#define DRIVER_NODE 1
 
 #ifndef DRIVER_NODE
 #define DRIVER_NODE 0
@@ -8,6 +8,7 @@
 #include "can_bus.h"
 #include "can_bus_message_handler.h"
 #include "tesla_model_rc.h"
+#include <stdio.h>
 
 /*******************************************************************************
  *
@@ -18,7 +19,7 @@
 #if DRIVER_NODE == 1
 static bool increase_speed = true;
 static bool increase_steering = true;
-static dbc_DRIVER_MOTOR_CONTROL_s driver_motor_control_message = {0};
+static dbc_DRIVER_MOTOR_CONTROL_s driver_motor_control_message;
 #endif
 
 /*******************************************************************************
@@ -43,16 +44,16 @@ bool fake_driver__transmit_motor_messages_10Hz(void) {
 
 void fake_driver__compute_control_signals(void) {
   if (increase_speed) {
-    if ((driver_motor_control_message.DRIVER_MOTOR_CONTROL_SPEED_KPH + 1.0f > 10.0f)) {
+    if ((driver_motor_control_message.DRIVER_MOTOR_CONTROL_SPEED_KPH + 0.1f > 10.0f)) {
       increase_speed = false;
     } else {
-      driver_motor_control_message.DRIVER_MOTOR_CONTROL_SPEED_KPH += 1.0f;
+      driver_motor_control_message.DRIVER_MOTOR_CONTROL_SPEED_KPH += 0.1f;
     }
   } else {
-    if (driver_motor_control_message.DRIVER_MOTOR_CONTROL_SPEED_KPH - 1.0f < 0) {
+    if (driver_motor_control_message.DRIVER_MOTOR_CONTROL_SPEED_KPH - 0.1f < -10.0f) {
       increase_speed = true;
     } else {
-      driver_motor_control_message.DRIVER_MOTOR_CONTROL_SPEED_KPH -= 1.0f;
+      driver_motor_control_message.DRIVER_MOTOR_CONTROL_SPEED_KPH -= 0.1f;
     }
   }
 
@@ -69,5 +70,8 @@ void fake_driver__compute_control_signals(void) {
       driver_motor_control_message.DRIVER_MOTOR_CONTROL_STEER -= 0.1f;
     }
   }
+
+  printf("speed: %f\n", (double)driver_motor_control_message.DRIVER_MOTOR_CONTROL_SPEED_KPH);
+  printf("steer: %f\n\n", (double)driver_motor_control_message.DRIVER_MOTOR_CONTROL_STEER);
 }
 #endif
