@@ -132,7 +132,7 @@ void gps__init(void) {
   gps__private_configure_for_nmea_gngga();
 }
 
-void gps__run_once(void) {
+void gps__run_once_10Hz(void) {
   gps__private_absorb_data();
   gps__private_handle_line();
 }

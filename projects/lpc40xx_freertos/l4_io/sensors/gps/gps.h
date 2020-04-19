@@ -30,5 +30,5 @@ typedef struct {
  ******************************************************************************/
 
 void gps__init(void);
-void gps__run_once(void);
+void gps__run_once_10Hz(void);
 gps_coordinates_t gps__get_coordinates(void);

@@ -6,9 +6,9 @@
 #include "board_io.h"
 #include "can_bus_initializer.h"
 #include "can_bus_message_handler.h"
+#include "checkpoint.h"
 #include "geological.h"
 #include "gpio.h"
-
 /******************************************************************************
  * Your board will reset if the periodic function does not return within its deadline
  * For 1Hz, the function must return within 1000ms
@@ -29,7 +29,8 @@ void periodic_callbacks__1Hz(uint32_t callback_count) { can_bus_initializer__han
 void periodic_callbacks__10Hz(uint32_t callback_count) {
   can_bus_message_handler__manage_mia_10Hz();
   can_bus_message_handler__handle_all_incoming_messages_10Hz();
-  geological__run_once();
+  geological__run_once_10Hz();
+  checkpoint__run_once_10Hz();
 }
 void periodic_callbacks__100Hz(uint32_t callback_count) {
   // Add your code here

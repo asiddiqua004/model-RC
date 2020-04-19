@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "checkpoint.h"
 #include "compass.h"
 #include "geological.h"
 #include "gps.h"
@@ -14,6 +15,7 @@
 
 static float compass_heading;
 static gps_coordinates_t current_coordinates;
+static gps_coordinates_t next_point_coordinates;
 static gps_coordinates_t destination_coordinates;
 #define M_PI 3.14159265358979323846264338327950288
 
@@ -33,8 +35,8 @@ static float geological__private_compute_heading_degree(void) {
   // β = atan2(X,Y) <- This is the angle towards our desired destination in radians.
   // This then needs to be converted to degrees -> β * π / 180
 
-  const float theta_b = destination_coordinates.latitude;
-  const float delta_L = destination_coordinates.longitude - current_coordinates.longitude;
+  const float theta_b = next_point_coordinates.latitude;
+  const float delta_L = next_point_coordinates.longitude - current_coordinates.longitude;
   // const float delta_L = destination_coordinates.longitude > current_coordinates.longitude
   //                           ? destination_coordinates.longitude - current_coordinates.longitude
   //                           : current_coordinates.longitude - destination_coordinates.longitude;
@@ -65,6 +67,13 @@ static void geological__private_compute_and_send_heading() {
   dbc_encode_and_send_GEO_GPS_COMPASS_HEADINGS(NULL, &message);
 }
 
+// static void geological__private_set_or(void) {
+//   if (false == is_origin_received) {
+//     checkpoint__init(current_coordinates);
+//     is_origin_received = true;
+//   }
+// }
+
 /*******************************************************************************
  *
  *                      P U B L I C    F U N C T I O N S
@@ -76,14 +85,20 @@ bool geological__init(void) {
   return compass__init();
 }
 
-void geological__run_once(void) {
-  gps__run_once();
+void geological__run_once_10Hz(void) {
+  gps__run_once_10Hz();
   geological__private_handle_compass();
   geological__private_handle_gps();
+  checkpoint__set_current_coordinates(current_coordinates);
   geological__private_compute_and_send_heading();
 }
 
 void geological__update_destination_coordinates(dbc_BRIDGE_SENSOR_GPS_HEADINGS_s *new_coordinates) {
   destination_coordinates.longitude = new_coordinates->BRIDGE_SENSOR_GPS_HEADINGS_LONGITUDE;
   destination_coordinates.latitude = new_coordinates->BRIDGE_SENSOR_GPS_HEADINGS_LATITUDE;
+}
+
+void geological__set_next_point_coordinates(gps_coordinates_t incoming_next_point_coordinates) {
+  next_point_coordinates.latitude = incoming_next_point_coordinates.latitude;
+  next_point_coordinates.longitude = incoming_next_point_coordinates.longitude;
 }
