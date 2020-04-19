@@ -6,7 +6,6 @@
 #include "checkpoint.h"
 #include "geological.h"
 #include "gps.h"
-#include "tesla_model_rc.h"
 
 /*******************************************************************************
  *
@@ -42,7 +41,8 @@ static const gps_coordinates_t checkpoints[] = {
  *
  ******************************************************************************/
 
-// Reference: https://www.tutorialspoint.com/what-is-the-most-effective-way-for-float-and-double-comparison-in-c-cplusplus
+// Reference:
+// https://www.tutorialspoint.com/what-is-the-most-effective-way-for-float-and-double-comparison-in-c-cplusplus
 static bool checkpoint__private_compare_float(float x, float y) {
   float epsilon = 0.01f;
   if ((float)fabs(x - y) < epsilon)
@@ -151,7 +151,7 @@ void checkpoint__set_current_coordinates(gps_coordinates_t incoming_current_coor
   current_coordinates.longitude = incoming_current_coordinates.longitude;
 }
 
-void checkpoint__set_destination_coordinates(gps_coordinates_t incoming_destination_coordinates){
+void checkpoint__set_destination_coordinates(gps_coordinates_t incoming_destination_coordinates) {
   destination_coordinates.latitude = incoming_destination_coordinates.latitude;
   destination_coordinates.longitude = incoming_destination_coordinates.longitude;
 }

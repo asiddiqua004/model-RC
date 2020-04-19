@@ -1,8 +1,8 @@
 #include "unity.h"
 
 // Mocks
-#include "Mockgeological.h"
 #include "Mockcompass.h"
+#include "Mockgeological.h"
 #include "Mockgps.h"
 
 // Module includes
@@ -58,4 +58,3 @@ void tearDown(void) {}
  *                                 T E S T S
  *
  *****************************************************************************/
-
