@@ -69,3 +69,8 @@ void wifi_implementation__handle_line(void) {
     }
   }
 }
+
+void wifi_implementation__send_line(const uint8_t front_radar, const uint8_t left_radar, const uint8_t right_radar,
+                                    const uint8_t back_radar) {
+  uart_printf(UART__3, "^%02d,%02d,%02d,%02d", front_radar, left_radar, right_radar, back_radar);
+}

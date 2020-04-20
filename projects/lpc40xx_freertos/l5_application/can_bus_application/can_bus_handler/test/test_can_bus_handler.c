@@ -8,16 +8,16 @@
 void setUp(void) {}
 void tearDown(void) {}
 
-void test_can_bus_handler__transmit_messages_10Hz(void) {
-  sensor_node__send_messages_over_can_ExpectAndReturn(true);
-
-  can_bus_handler__transmit_messages_10Hz();
-}
-
 void test_can_bus_handler__transmit_messages_1Hz(void) {
   // sensor_node__test();
-
   can_bus_handler__transmit_messages_1Hz();
+}
+
+void test_can_bus_handler__transmit_messages_10Hz(void) {
+  sensor_node__send_messages_over_can_ExpectAndReturn(true);
+  sensor_node__send_radars_to_wifi_Expect();
+
+  can_bus_handler__transmit_messages_10Hz();
 }
 
 void test_can_bus_handler__manage_mia_10Hz(void) {

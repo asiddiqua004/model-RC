@@ -137,3 +137,13 @@ void test_sensor_node__collect_data(void) {
   ultrasonic_implementation__initiate_ultrasonics_range_Expect();
   sensor_node__collect_data();
 }
+
+void test_sensor_node__send_radars_to_wifi(void) {
+  ultrasonic_implementation__get_front_ultrasonic_distance_in_ExpectAndReturn(0);
+  ultrasonic_implementation__get_left_ultrasonic_distance_in_ExpectAndReturn(0);
+  ultrasonic_implementation__get_right_ultrasonic_distance_in_ExpectAndReturn(0);
+  ultrasonic_implementation__get_back_ultrasonic_distance_in_ExpectAndReturn(0);
+  wifi_implementation__send_line_Expect(0, 0, 0, 0);
+
+  sensor_node__send_radars_to_wifi();
+}

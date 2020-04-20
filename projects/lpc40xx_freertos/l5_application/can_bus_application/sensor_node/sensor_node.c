@@ -110,3 +110,10 @@ void sensor_node__handle_wifi_lines(void) { wifi_implementation__handle_line(); 
 void sensor_node__collect_data(void) { ultrasonic_implementation__initiate_ultrasonics_range(); }
 
 void sensor_node__test(void) { wifi_implementation__polled_test_echo(); }
+
+void sensor_node__send_radars_to_wifi(void) {
+  wifi_implementation__send_line(ultrasonic_implementation__get_front_ultrasonic_distance_in(),
+                                 ultrasonic_implementation__get_left_ultrasonic_distance_in(),
+                                 ultrasonic_implementation__get_right_ultrasonic_distance_in(),
+                                 ultrasonic_implementation__get_back_ultrasonic_distance_in());
+}

@@ -63,3 +63,14 @@ void test_wifi_implementation__handle_line(void) {
 
   wifi_implementation__handle_line();
 }
+
+void test_wifi_implementation__send_line(void) {
+  const uint8_t front_radar = 9;
+  const uint8_t left_radar = 10;
+  const uint8_t right_radar = 3;
+  const uint8_t back_radar = 50;
+
+  uart_printf_ExpectAndReturn(UART__3, "^%02d,%02d,%02d,%02d", 0);
+
+  wifi_implementation__send_line(front_radar, left_radar, right_radar, back_radar);
+}
