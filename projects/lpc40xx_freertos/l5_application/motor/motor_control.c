@@ -22,10 +22,10 @@
  *
  ******************************************************************************/
 
-static const float motor_speed_minimum = -10.0f;
+static const float motor_speed_minimum = 0.0f;
 static const float motor_speed_maximum = 10.0f;
-static const float steering_angle_minimum = -2.0f;
-static const float steering_angle_maximum = 2.0f;
+static const float steering_angle_minimum = 0.0f;
+static const float steering_angle_maximum = 4.0f;
 
 static const float motor_speed_neutral = 8.9f;
 static const float motor_reverse_threshold = 8.5f;
