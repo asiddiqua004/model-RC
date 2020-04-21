@@ -66,11 +66,9 @@ void tearDown(void) {}
 
 void test_motor_control__initialize(void) {
   gpio_s gpio = {0U};
-  pwm1__init_single_edge_Expect(100U);
+  pwm1__init_single_edge_Expect(60U);
   gpio__construct_with_function_ExpectAndReturn(GPIO__PORT_2, 0, GPIO__FUNCTION_1, gpio);
   gpio__construct_with_function_ExpectAndReturn(GPIO__PORT_2, 4, GPIO__FUNCTION_1, gpio);
-  gpio__construct_as_output_ExpectAndReturn(GPIO__PORT_2, 1, gpio);
-  gpio__construct_as_output_ExpectAndReturn(GPIO__PORT_2, 2, gpio);
   gpiolab__attach_interrupt_Expect(GPIO_0, PIN_22, GPIO_INTR__RISING_EDGE, rotor_callback);
   gpiolab__enable_interrupts_Expect();
   motor_control__initialize();
@@ -79,32 +77,30 @@ void test_motor_control__initialize(void) {
 void test_motor_control__handle_speed(void) {
   gpio_s gpio = {0U};
 
-  motor_control_state.current_speed_kph_mapped = 0.0f;
+  motor_control_state.current_speed_kph_mapped = 8.9f;
+  sys_time__get_uptime_ms_ExpectAndReturn(1);
 
   // Stop motor condition
   pwm1__set_duty_cycle_Expect(pwm_channel_speed, motor_control_state.current_speed_kph_mapped);
-  gpio__reset_Expect(gpio);
-  gpio__reset_Expect(gpio);
   motor_control__handle_speed();
 
-  motor_control_state.current_speed_kph_mapped = 80.0f;
+  motor_control_state.current_speed_kph_mapped = 9.3f;
+  sys_time__get_uptime_ms_ExpectAndReturn(5000);
 
   // Motor forward condition
   pwm1__set_duty_cycle_Expect(pwm_channel_speed, motor_control_state.current_speed_kph_mapped);
-  gpio__reset_Expect(gpio);
-  gpio__set_Expect(gpio);
   motor_control__handle_speed();
 }
 
 void test_motor_control__handle_steering(void) {
 
-  motor_control_state.current_steer_degrees_mapped = -2.0f;
+  motor_control_state.current_steer_degrees_mapped = 0.0f;
 
   // Steer left
   pwm1__set_duty_cycle_Expect(pwm_channel_steering, motor_control_state.current_steer_degrees_mapped);
   motor_control__handle_steering();
 
-  motor_control_state.current_steer_degrees_mapped = 2.0f;
+  motor_control_state.current_steer_degrees_mapped = 4.0f;
 
   // Steer right
   pwm1__set_duty_cycle_Expect(pwm_channel_steering, motor_control_state.current_steer_degrees_mapped);
@@ -115,8 +111,8 @@ void test_motor_control__update_speed_and_steering(void) {
   dbc_DRIVER_MOTOR_CONTROL_s message = {.DRIVER_MOTOR_CONTROL_SPEED_KPH = 5.0f, .DRIVER_MOTOR_CONTROL_STEER = 1.2f};
 
   motor_control__update_speed_and_steering(&message);
-  TEST_ASSERT_EQUAL_FLOAT(50.0f, motor_control_state.current_speed_kph_mapped);
-  TEST_ASSERT_EQUAL_FLOAT(21.6f, motor_control_state.current_steer_degrees_mapped);
+  TEST_ASSERT_EQUAL_FLOAT(8.25f, motor_control_state.current_speed_kph_mapped);
+  TEST_ASSERT_EQUAL_FLOAT(10.035f, motor_control_state.current_steer_degrees_mapped);
 
   // Test outbounds
   memset(&motor_control_state, 0U, sizeof(motor_control_state));
