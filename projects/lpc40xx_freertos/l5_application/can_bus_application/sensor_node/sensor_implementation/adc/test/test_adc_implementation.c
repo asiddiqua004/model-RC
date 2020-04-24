@@ -16,21 +16,31 @@ void test_adc_implementation__initialization(void) {
   adc_implementation__initialization();
 }
 
-uint16_t voltage_to_adc_bits(float voltage) { return (4095 / 3.3) * voltage; }
+void test_adc_implementation__get_battery_voltage_conversions(void) {
+  const float voltage_dividing_ratio = 100000.0F / (100000.0F + 1000000.0F);
+  const float adc_step_resolution = 4095.0F / 3.3F;
 
-float test_adc_implementation__get_battery_voltage(void) {
-  float battery_voltage = 7.23;
+  float battery_voltage = 7.23F;
 
-  adc__get_adc_value_ExpectAndReturn(ADC__CHANNEL_2, voltage_to_adc_bits(battery_voltage));
-  TEST_ASSERT_EQUAL_FLOAT(adc_implementation__get_battery_voltage(), battery_voltage);
+  adc__get_adc_value_ExpectAndReturn(ADC__CHANNEL_2, battery_voltage * voltage_dividing_ratio * adc_step_resolution);
+  const float voltage_out_one = adc_implementation__get_battery_voltage();
+  TEST_ASSERT_EQUAL_size_t(voltage_out_one * 10, battery_voltage * 10);
 
-  battery_voltage = 0.0;
+  battery_voltage = 0.0F;
 
-  adc__get_adc_value_ExpectAndReturn(ADC__CHANNEL_2, voltage_to_adc_bits(battery_voltage));
-  TEST_ASSERT_EQUAL_FLOAT(adc_implementation__get_battery_voltage(), battery_voltage);
+  adc__get_adc_value_ExpectAndReturn(ADC__CHANNEL_2, battery_voltage * voltage_dividing_ratio * adc_step_resolution);
+  const float voltage_out_two = adc_implementation__get_battery_voltage();
+  TEST_ASSERT_EQUAL_size_t(voltage_out_two * 10, battery_voltage * 10);
 
-  battery_voltage = 4.67;
+  battery_voltage = 4.67F;
 
-  adc__get_adc_value_ExpectAndReturn(ADC__CHANNEL_2, voltage_to_adc_bits(battery_voltage));
-  TEST_ASSERT_EQUAL_FLOAT(adc_implementation__get_battery_voltage(), battery_voltage);
+  adc__get_adc_value_ExpectAndReturn(ADC__CHANNEL_2, battery_voltage * voltage_dividing_ratio * adc_step_resolution);
+  const float voltage_out_three = adc_implementation__get_battery_voltage();
+  TEST_ASSERT_EQUAL_size_t(voltage_out_three * 10, battery_voltage * 10);
+
+  battery_voltage = 1.53F;
+
+  adc__get_adc_value_ExpectAndReturn(ADC__CHANNEL_2, battery_voltage * voltage_dividing_ratio * adc_step_resolution);
+  const float voltage_out_four = adc_implementation__get_battery_voltage();
+  TEST_ASSERT_EQUAL_size_t(voltage_out_four * 10, battery_voltage * 10);
 }
