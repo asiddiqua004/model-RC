@@ -6,6 +6,7 @@
 #include "can_bus.h"
 #include "gpio.h"
 
+#include "adc_implementation.h"
 #include "tesla_model_rc.h"
 #include "ultrasonic_implementation.h"
 #include "wifi_implementation.h"
@@ -17,6 +18,7 @@ static dbc_DRIVER_HEARTBEAT_s can_msg_driver_heartbeat = {0};
 void sensor_node__init(void) {
   wifi_implementation__initialize();
   ultrasonic_implementation__initialize();
+  adc_implementation__initialization();
 }
 
 static bool sensor_node__construct_and_send_gps_headings_data(void) {
@@ -40,8 +42,7 @@ static bool sensor_node__construct_and_send_vehicle_navigation_state_data(void) 
 static bool sensor_node__construct_and_send_voltage_data(void) {
   dbc_BRIDGE_SENSOR_VOLTAGE_s voltage_struct = {0};
 
-  // TODO: Create ADC and read voltage input from battery
-  voltage_struct.BRIDGE_SENSOR_VOLTAGE = 3.0;
+  voltage_struct.BRIDGE_SENSOR_VOLTAGE = adc_implementation__get_battery_voltage();
 
   return dbc_encode_and_send_BRIDGE_SENSOR_VOLTAGE(NULL, &voltage_struct);
 }

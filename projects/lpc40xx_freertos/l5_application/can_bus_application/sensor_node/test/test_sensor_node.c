@@ -1,8 +1,11 @@
 #include "unity.h"
 
+#include "Mockadc.h"
 #include "Mockboard_io.h"
 #include "Mockcan_bus.h"
 #include "Mockgpio.h"
+
+#include "Mockadc_implementation.h"
 #include "Mockultrasonic_implementation.h"
 #include "Mockwifi_implementation.h"
 #include "Mockwifi_message_handler.h"
@@ -22,6 +25,7 @@ void tearDown(void) {}
 void test_sensor_node__init(void) {
   wifi_implementation__initialize_Expect();
   ultrasonic_implementation__initialize_Expect();
+  adc_implementation__initialization_Expect();
 
   sensor_node__init();
 }
@@ -41,6 +45,7 @@ void test_sensor_node__send_messages_over_can_succesfully(void) {
   can__tx_IgnoreArg_can_message_ptr();
 
   // voltage message
+  adc_implementation__get_battery_voltage_ExpectAndReturn(0.0);
   can__tx_ExpectAndReturn(can1, NULL, 0, true);
   can__tx_IgnoreArg_can_message_ptr();
 
@@ -70,6 +75,7 @@ void test_sensor_node__send_messages_over_can_fail(void) {
   can__tx_IgnoreArg_can_message_ptr();
 
   // voltage message
+  adc_implementation__get_battery_voltage_ExpectAndReturn(0.0);
   can__tx_ExpectAndReturn(can1, NULL, 0, false);
   can__tx_IgnoreArg_can_message_ptr();
 
