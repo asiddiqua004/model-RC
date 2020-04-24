@@ -33,37 +33,37 @@ void test_wifi_message_handler__set_vehicle_navigation_state_parse_incorrect_sta
 }
 
 void test_wifi_message_handler__set_GPS_headings_parse_positive(void) {
-  const char *line = "+1234.5678,+8765.4321";
+  const char *line = "+123.456789,+987.654321";
 
   wifi_message_handler__set_GPS_headings(line, strlen(line));
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), 1234.5678);
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), 8765.4321);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), 123.456789);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), 987.654321);
 }
 
 void test_wifi_message_handler__set_GPS_headings_parse_negative(void) {
-  const char *line = "-1234.5678,-8765.4321";
+  const char *line = "-123.456789,-987.654321";
 
   wifi_message_handler__set_GPS_headings(line, strlen(line));
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), -1234.5678);
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), -8765.4321);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), -123.456789);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), -987.654321);
 }
 
 void test_wifi_message_handler__set_GPS_headings_parse_positive_and_negative(void) {
-  const char *line = "-1234.5678,+8765.4321";
+  const char *line = "-123.456789,+987.654321";
 
   wifi_message_handler__set_GPS_headings(line, strlen(line));
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), -1234.5678);
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), 8765.4321);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), -123.456789);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), 987.654321);
 
-  const char *second_line = "+1234.5678,-8765.4321";
+  const char *second_line = "+123.456789,-987.654321";
 
   wifi_message_handler__set_GPS_headings(second_line, strlen(second_line));
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), 1234.5678);
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), -8765.4321);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), 123.456789);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), -987.654321);
 }
 
 void test_wifi_message_handler__set_GPS_headings_parse_incorrect_length(void) {
-  const char *line = "-1234.5678,-8765.432";
+  const char *line = "-123.5678,-875.432";
 
   wifi_message_handler__set_GPS_headings(line, strlen(line));
   TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), 0.0);
@@ -89,21 +89,57 @@ void test_wifi_message_handler__parse_status_lines(void) {
 }
 
 void test_wifi_message_handler__parse_GPS_headings_lines(void) {
-  const char *line = "#+1111.2222,+3333.4444";
+  const char *line = "#+111.222222,+333.444444";
 
   wifi_message_handler__parse_line(line, strlen(line));
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), 1111.2222);
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), 3333.4444);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), 111.222222);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), 333.444444);
 
-  const char *second_line = "#-5555.6666,-7777.8888";
+  const char *second_line = "#-555.666666,-777.888888";
 
   wifi_message_handler__parse_line(second_line, strlen(second_line));
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), -5555.666);
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), -7777.888);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), -555.666666);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), -777.888888);
 
   const char *third_line = "#incorrect";
 
   wifi_message_handler__parse_line(third_line, strlen(third_line));
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), -5555.6666);
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), -7777.8888);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), -555.666666);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), -777.888888);
+}
+
+void test_wifi_message_handler__parse_all_lines(void) {
+  const char *line = "#+111.222222,+333.444444";
+
+  wifi_message_handler__parse_line(line, strlen(line));
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), 111.222222);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), 333.444444);
+
+  const char *second_line = "$start";
+
+  wifi_message_handler__parse_line(second_line, strlen(second_line));
+  TEST_ASSERT_EQUAL(wifi_message_handler__get_vehicle_navigation_state(),
+                    BRIDGE_SENSOR_VEHICLE_NAVIGATION_STATE_NAVIGATE);
+
+  const char *third_line = "#-555.666666,-777.888888";
+
+  wifi_message_handler__parse_line(third_line, strlen(third_line));
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), -555.666666);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), -777.888888);
+
+  const char *fourth_line = "#incorrect";
+
+  wifi_message_handler__parse_line(fourth_line, strlen(fourth_line));
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), -555.666666);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), -777.888888);
+
+  const char *fifth_line = "$stop";
+
+  wifi_message_handler__parse_line(fifth_line, strlen(fifth_line));
+  TEST_ASSERT_EQUAL(wifi_message_handler__get_vehicle_navigation_state(), BRIDGE_SENSOR_VEHICLE_NAVIGATION_STATE_STOP);
+
+  const char *sixth_line = "$incorrect";
+
+  wifi_message_handler__parse_line(sixth_line, strlen(sixth_line));
+  TEST_ASSERT_EQUAL(wifi_message_handler__get_vehicle_navigation_state(), BRIDGE_SENSOR_VEHICLE_NAVIGATION_STATE_STOP);
 }

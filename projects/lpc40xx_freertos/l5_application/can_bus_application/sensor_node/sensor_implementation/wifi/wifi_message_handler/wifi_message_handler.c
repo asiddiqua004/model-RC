@@ -20,16 +20,16 @@ static void wifi_message_handler__set_vehicle_navigation_state(const char *line)
 
 static void wifi_message_handler__set_GPS_headings(const char *line, const size_t line_length) {
   const size_t total_gps_line_length =
-      strlen("Sxxxx.xxxx,Syyyy.yyyy"); // where S is sign, x is latitude, and y is longitude
+      strlen("Sxxx.xxxxxx,Syyy.yyyyyy"); // where S is sign, x is latitude, and y is longitude
   if (total_gps_line_length == line_length) {
-    char latitude[10] = {0};
+    char latitude[11] = {0};
     char latitude_sign = line[0];
 
-    char longitude[10] = {0};
-    char longitude_sign = line[11];
+    char longitude[11] = {0};
+    char longitude_sign = line[12];
 
     strncpy(latitude, line + 1, sizeof(latitude) - 1);
-    strncpy(longitude, line + 12, sizeof(longitude) - 1);
+    strncpy(longitude, line + 13, sizeof(longitude) - 1);
 
     GPS_headings_latitude = atof(latitude);
     GPS_headings_longitude = atof(longitude);
