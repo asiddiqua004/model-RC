@@ -5,6 +5,7 @@
 #include <string.h>
 
 // Mocks
+#include "Mockboard_io.h"
 #include "Mockclock.h"
 #include "Mockgpio.h"
 #include "Mockqueue.h"
@@ -52,6 +53,8 @@ static const size_t baud_rate_test = 9600U;
 static const char *gsg_string_negative = "$GPGGA,230612.015,1234.5678,S,12102.4634,W,0,04,5.7,508.3,M,,,,0000*04\r\n";
 static const char *gsg_string_positive = "$GPGGA,230612.015,1234.5678,N,12102.4634,E,0,04,5.7,508.3,M,,,,0000*0B\r\n";
 static const char *gsg_string_checksum_fail = "$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*48\r\n";
+static const char disable_gngll_message[] = {0xB5, 0x62, 0x06, 0x01, 0x08, 0x00, 0xF0, 0x01,
+                                             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2A};
 static const gps_coordinates_t parsed_coordinates_test_negative = {.latitude = -1234.5678f, .longitude = -12102.4634f};
 static const gps_coordinates_t parsed_coordinates_test_positive = {.latitude = 1234.5678f, .longitude = 12102.4634f};
 
@@ -88,6 +91,21 @@ static bool uart__get_stub_callback_positive(uart_e uart, char *input_byte, uint
   }
 }
 
+static bool uart__put_stub_callback(uart_e uart, char output_byte, uint32_t timeout_ms, int call_count) {
+  UNUSED(uart);
+  UNUSED(timeout_ms);
+  uint8_t array_size = sizeof(disable_gngll_message) / sizeof(disable_gngll_message[0]);
+  if (call_count <= array_size) {
+    output_byte = disable_gngll_message[call_count];
+    return true;
+  } else if (array_size + 1 == call_count) {
+    return false;
+  } else {
+    TEST_FAIL_MESSAGE("uart__put_stub_callback called too many times");
+    return false;
+  }
+}
+
 static void test_gps_init_setup(void) {
   QueueHandle_t rx_queue = NULL;
   QueueHandle_t tx_queue = NULL;
@@ -95,8 +113,8 @@ static void test_gps_init_setup(void) {
   gpio_s gpio = {0U};
   clock__get_peripheral_clock_hz_ExpectAndReturn(clock_rate_test);
   uart__init_Expect(gps_uart_test, clock_rate_test, baud_rate_test);
-  xQueueCreate_ExpectAndReturn(100U, sizeof(char), rx_queue);
-  xQueueCreate_ExpectAndReturn(8U, sizeof(char), tx_queue);
+  xQueueCreate_ExpectAndReturn(300U, sizeof(char), rx_queue);
+  xQueueCreate_ExpectAndReturn(300U, sizeof(char), tx_queue);
   uart__enable_queues_ExpectAndReturn(gps_uart_test, rx_queue, tx_queue, true);
   gpio__construct_with_function_ExpectAndReturn(GPIO__PORT_4, 28U, GPIO__FUNCTION_2, gpio);
   gpio__construct_with_function_ExpectAndReturn(GPIO__PORT_4, 29U, GPIO__FUNCTION_2, gpio);
@@ -122,6 +140,7 @@ void test_gps_init(void) {
 }
 
 void test_gps_run_once(void) {
+  uart__put_StubWithCallback(uart__put_stub_callback);
   uart__get_StubWithCallback(uart__get_stub_callback_negative);
   gps__run_once();
 }
