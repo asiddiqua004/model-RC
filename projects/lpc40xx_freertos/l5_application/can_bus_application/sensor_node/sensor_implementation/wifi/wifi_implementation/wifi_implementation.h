@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdint.h>
 
 // Enables UART 3 at 74880 baud rate for interfacing with Wifi device

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stddef.h>
 
 #include "tesla_model_rc.h"
