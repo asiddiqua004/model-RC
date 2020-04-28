@@ -44,3 +44,7 @@ static const can_void_func_t can_bus_data_overrun_callback;
 bool can_bus_initializer__init(void);
 
 void can_bus_initializer__handle_bus_off(void);
+
+bool can_bus_initalizer__get_can_init_status(void);
+
+bool can_bus_initalizer__get_bus_off_status(void);

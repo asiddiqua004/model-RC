@@ -6,6 +6,8 @@
 
 // Mocks
 #include "Mockboard_io.h"
+#include "Mockcan_bus_initializer.h"
+#include "Mockcan_bus_message_handler.h"
 #include "Mockclock.h"
 #include "Mockgpio.h"
 #include "Mockqueue.h"
@@ -13,6 +15,8 @@
 
 // Module includes
 #include "gps.c"
+
+#include "tesla_model_rc.h"
 
 #include "line_buffer.h"
 
@@ -169,6 +173,8 @@ void test_gps_run_once(void) {
   uart__get_StubWithCallback(uart__get_stub_callback_gps_lock);
   board_io__get_led3_ExpectAndReturn(gpio);
   gpio__toggle_Expect(gpio);
+  can_bus_initalizer__get_can_init_status_ExpectAndReturn(true);
+  dbc_send_can_message_ExpectAnyArgsAndReturn(true);
   gps__run_once();
 }
 

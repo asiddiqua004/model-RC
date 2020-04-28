@@ -4,9 +4,12 @@
 
 #include "FreeRTOS.h"
 #include "board_io.h"
+#include "can_bus_initializer.h"
+#include "can_bus_message_handler.h"
 #include "clock.h"
 #include "gpio.h"
 #include "queue.h"
+#include "tesla_model_rc.h"
 #include "uart.h"
 #include "uart_printf.h"
 
@@ -26,6 +29,7 @@ static line_buffer_s line;
 static gps_coordinates_t parsed_coordinates;
 static uint8_t fix_quality = 0;
 static bool is_gps_configured = false;
+static bool gps_lock = false;
 // static bool is_gps_disconnected = false;
 
 /*******************************************************************************
@@ -179,7 +183,6 @@ static void gps__private_configure_for_nmea_gngga(void) {
 }
 
 static bool gps__private_get_gps_lock(void) {
-  bool gps_lock = false;
   if (1 == fix_quality || 2 == fix_quality) {
     gps_lock = true;
     gpio__toggle(board_io__get_led3());
@@ -188,6 +191,14 @@ static bool gps__private_get_gps_lock(void) {
     gps_lock = false;
   }
   return gps_lock;
+}
+
+void gps__private_send_debug_messages(void) {
+  dbc_GEO_DEBUG_s geo_debug_messages = {0U};
+  geo_debug_messages.GEO_DEBUG_CAN_INIT = can_bus_initalizer__get_can_init_status();
+  geo_debug_messages.GEO_DEBUG_GPS_INIT = is_gps_configured;
+  geo_debug_messages.GEO_DEBUG_GPS_LOCK = gps_lock;
+  dbc_encode_and_send_GEO_DEBUG(NULL, &geo_debug_messages);
 }
 /*******************************************************************************
  *
@@ -221,6 +232,7 @@ void gps__run_once(void) {
   // if (is_gps_disconnected == true) {
   //   printf("GPS disconnected\n");
   // }
+  gps__private_send_debug_messages();
 }
 
 gps_coordinates_t gps__get_coordinates(void) { return parsed_coordinates; }

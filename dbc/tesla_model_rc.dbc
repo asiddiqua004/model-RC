@@ -67,9 +67,20 @@ BO_ 108 BRIDGE_SENSOR_VEHICLE_NAVIGATION_STATE: 1 BRIDGE_SENSOR
 BO_ 109 BRIDGE_SENSOR_HEARTBEAT: 1 BRIDGE_SENSOR
  SG_ BRIDGE_SENSOR_HEARTBEAT_CMD : 0|8@1+ (1,0) [0|0] "" DRIVER
 
- BO_ 110 GEO_HEARTBEAT: 1 GEO
+BO_ 110 GEO_HEARTBEAT: 1 GEO
  SG_ GEO_HEARTBEAT_CMD : 0|8@1+ (1,0) [0|0] "" DRIVER
 
+BO_ 111 DRIVER_DEBUG: 1 DRIVER
+ SG_ DRIVER_DEBUG_CAN_INIT : 0|1@1+ (1,0) [0|0] "" DBG
+ SG_ DRIVER_DEBUG_BUS_OFF : 1|1@1+ (1,0) [0|0] "" DBG
+ SG_ DRIVER_DEBUG_ALL_NODE_HBT : 2|1@1+ (1,0) [0|0] "" DBG
+
+BO_ 112 GEO_DEBUG: 1 GEO
+ SG_ GEO_DEBUG_CAN_INIT : 0|1@1+ (1,0) [0|0] "" DBG
+ SG_ GEO_DEBUG_GPS_INIT : 1|1@1+ (1,0) [0|0] "" DBG
+ SG_ GEO_DEBUG_GPS_LOCK : 2|1@1+ (1,0) [0|0] "" DBG
+
+CM_ BU_ DBG "The driver controller driving the car";
 CM_ BU_ DRIVER "The driver controller driving the car";
 CM_ BU_ MOTOR "The motor controller of the car";
 CM_ BU_ BRIDGE_SENSOR "The bridge and sensor controller of the car";

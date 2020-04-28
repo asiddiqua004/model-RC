@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 #pragma once
 
 /*******************************************************************************
@@ -32,3 +34,5 @@ typedef struct {
 void gps__init(void);
 void gps__run_once(void);
 gps_coordinates_t gps__get_coordinates(void);
+bool gps__get_gps_lock(void);
+void gps__geo_send_debug_messages(void);
