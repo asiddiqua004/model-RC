@@ -51,8 +51,8 @@ static const pwm1_channel_e pwm_channel_steering = PWM1__2_4;
 static uint32_t rotor_tick_count;
 #define PI 3.14159265359f;
 static uint32_t previous_rotor_check_time_ms;
-static const float ticks_per_rotation = 20.0f;
-static const uint32_t rotor_processing_interval_ms = 1000U;
+static const float ticks_per_rotation = 5.0f;
+static const uint32_t rotor_processing_interval_ms = 100U;
 static const float wheel_circumference_cm = 10.0f * PI; // Cirmcumference = PI * diameter
 static float latest_calculated_ground_speed_km_per_hour;
 static float latest_requested_speed;
@@ -124,9 +124,9 @@ void motor_control__heartbeat(void) {
 }
 
 void motor_control__run_once(void) {
-  motor_control__handle_speed();
   motor_control__handle_steering();
   motor_control__private_handle_rotor();
+  motor_control__handle_speed();
 }
 
 static uint64_t time_elapsed;
@@ -136,117 +136,102 @@ static float motor_control_current_pwm;
 void motor_control__handle_speed(void) {
   const uint64_t current_time = sys_time__get_uptime_ms();
   /**
-   * On the first call to this function, we need to set the motor speed to "neutral". 
+   * On the first call to this function, we need to set the motor speed to "neutral".
    * This is involved with the self-check sequence that the ESC runs through on boot.
    */
 
-  switch(current_state) {
-    case SPEED_CONTROL_STATE__ESC_ARM_INITIALIZE: {
-      pwm1__set_duty_cycle(pwm_channel_speed, motor_speed_neutral);
-      time_elapsed = current_time;
-      motor_control_current_pwm = motor_speed_neutral;
-      current_state = SPEED_CONTROL_STATE__ESC_ARM_WAIT_STATE;
-      break;
-    }
-    case SPEED_CONTROL_STATE__ESC_ARM_WAIT_STATE: {
-      if (current_time - time_elapsed >= motor_ecu_arm_timeout) {
-        current_state = SPEED_CONTROL_STATE__STOPPED;
-      }
-      break;
-    }
-    case SPEED_CONTROL_STATE__STOPPED: {
-      pwm1__set_duty_cycle(pwm_channel_speed, motor_speed_neutral);
-      if (latest_requested_speed > motor_speed_forward_threshold) {
-        current_state = SPEED_CONTROL_STATE__FORWARD;
-      }
-      else if (latest_requested_speed < motor_speed_reverse_threshold) {
-        current_state = SPEED_CONTROL_STATE__TRANSITION_TO_REVERSE_0;
-      }
-      else {
-        current_state = SPEED_CONTROL_STATE__STOPPED;
-      }
-      break;
-    }
-    case SPEED_CONTROL_STATE__FORWARD: {
-      if (latest_requested_speed > motor_speed_reverse_threshold && latest_requested_speed < motor_speed_forward_threshold) {
-        motor_control_current_pwm = motor_speed_neutral;
-        pwm1__set_duty_cycle(pwm_channel_speed, motor_control_current_pwm);
-        current_state = SPEED_CONTROL_STATE__STOPPED;
-        break;
-      }
-      const float distance_to_requested_speed = latest_requested_speed - latest_calculated_ground_speed_km_per_hour;
-      const float normalized_distance_to_requested_speed = map(distance_to_requested_speed, 0.0f, 5.0f, 0.0f, 1.0f);
-      if (normalized_distance_to_requested_speed > 0.0f) {
-        motor_control_current_pwm += normalized_distance_to_requested_speed * distance_to_requested_speed;
-      }
-      else if (normalized_distance_to_requested_speed < 0.0f) {
-        motor_control_current_pwm -= normalized_distance_to_requested_speed * distance_to_requested_speed;
-      }
-      else {
-        ; // Speed is correct
-      }
-      pwm1__set_duty_cycle(pwm_channel_speed, motor_control_current_pwm);
-      break;
-    }
-    case SPEED_CONTROL_STATE__TRANSITION_TO_REVERSE_0: {
-      current_state = SPEED_CONTROL_STATE__TRANSITION_TO_REVERSE_1;
-      motor_control_current_pwm = motor_speed_neutral;
-      pwm1__set_duty_cycle(pwm_channel_speed, motor_control_current_pwm);
-      break;
-    }
-    case SPEED_CONTROL_STATE__TRANSITION_TO_REVERSE_1: {
-      motor_control_current_pwm = motor_reverse_threshold;
-      pwm1__set_duty_cycle(pwm_channel_speed, motor_control_current_pwm);
-      current_state = SPEED_CONTROL_STATE__REVERSE;
-      break;
-    }
-    case SPEED_CONTROL_STATE__REVERSE: {
-      if (latest_requested_speed > motor_speed_reverse_threshold && latest_requested_speed < motor_speed_forward_threshold) {
-        motor_control_current_pwm = motor_speed_neutral;
-        pwm1__set_duty_cycle(pwm_channel_speed, motor_control_current_pwm);
-        current_state = SPEED_CONTROL_STATE__STOPPED;
-        break;
-      }
-      const float distance_to_requested_speed = latest_requested_speed - latest_calculated_ground_speed_km_per_hour;
-      const float normalized_distance_to_requested_speed = map(distance_to_requested_speed, -5.0f, 0.0f, 0.0f, 1.0f);
-      if (normalized_distance_to_requested_speed > 0.0f) {
-        motor_control_current_pwm -= normalized_distance_to_requested_speed * distance_to_requested_speed;
-      }
-      else if (normalized_distance_to_requested_speed < 0.0f) {
-        motor_control_current_pwm += normalized_distance_to_requested_speed * distance_to_requested_speed;
-      }
-      else {
-        ; // Speed is correct
-      }
-      pwm1__set_duty_cycle(pwm_channel_speed, motor_control_current_pwm);
-      break;
-    }
+  switch (current_state) {
+  case SPEED_CONTROL_STATE__ESC_ARM_INITIALIZE: {
+    printf("state = SPEED_CONTROL_STATE__ESC_ARM_INITIALIZE\n");
+    pwm1__set_duty_cycle(pwm_channel_speed, motor_speed_neutral);
+    time_elapsed = current_time;
+    motor_control_current_pwm = motor_speed_neutral;
+    current_state = SPEED_CONTROL_STATE__ESC_ARM_WAIT_STATE;
+    break;
   }
-//   if (0U == time_elapsed) {
-//     pwm1__set_duty_cycle(pwm_channel_speed, motor_speed_neutral);
-//     time_elapsed = current_time;
-//   } else if (current_time - time_elapsed >= motor_ecu_arm_timeout) {
-//     if (motor_control_state.current_speed_kph_mapped == motor_speed_neutral) {
-//       // Stop Motor
-//       pwm1__set_duty_cycle(pwm_channel_speed, motor_speed_neutral);
-//     } else {
-//       if (forward && motor_control_state.current_speed_kph_mapped < motor_reverse_threshold) {
-//         pwm1__set_duty_cycle(pwm_channel_speed, motor_speed_neutral);
-//         forward = false;
-//         printf("==========================================\nHit Reverse Condition\n\n");
-//       } else if (motor_control_state.current_speed_kph_mapped > motor_speed_neutral) {
-//         pwm1__set_duty_cycle(pwm_channel_speed, motor_control_state.current_speed_kph_mapped);
-//         forward = true;
-//       } else {
-//         pwm1__set_duty_cycle(pwm_channel_speed, motor_control_state.current_speed_kph_mapped);
-//         printf("moving...%f\n", (double)motor_control_state.current_speed_kph_mapped);
-//       }
-//     }
-//   } else {
-//   }
-//   printf("motor receiving speed: %f\n", (double)motor_control_state.current_speed_kph_mapped);
-//   printf("direction :%s\n", forward ? "forward" : "reverse");
-// }
+  case SPEED_CONTROL_STATE__ESC_ARM_WAIT_STATE: {
+    printf("state = SPEED_CONTROL_STATE__ESC_ARM_WAIT_STATE\n");
+    if (current_time - time_elapsed >= motor_ecu_arm_timeout) {
+      current_state = SPEED_CONTROL_STATE__STOPPED;
+    }
+    break;
+  }
+  case SPEED_CONTROL_STATE__STOPPED: {
+    pwm1__set_duty_cycle(pwm_channel_speed, motor_speed_neutral);
+    printf("state = SPEED_CONTROL_STATE__STOPPED\n");
+    if (latest_requested_speed > motor_speed_forward_threshold) {
+      current_state = SPEED_CONTROL_STATE__FORWARD;
+    } else if (latest_requested_speed < motor_speed_reverse_threshold) {
+      current_state = SPEED_CONTROL_STATE__TRANSITION_TO_REVERSE_0;
+    } else {
+      current_state = SPEED_CONTROL_STATE__STOPPED;
+    }
+    break;
+  }
+  case SPEED_CONTROL_STATE__FORWARD: {
+    if (latest_requested_speed > motor_speed_reverse_threshold &&
+        latest_requested_speed < motor_speed_forward_threshold) {
+      motor_control_current_pwm = motor_speed_neutral;
+      pwm1__set_duty_cycle(pwm_channel_speed, motor_control_current_pwm);
+      current_state = SPEED_CONTROL_STATE__STOPPED;
+      break;
+    }
+    printf("state = SPEED_CONTROL_STATE__FORWARD\n");
+    const float distance_to_requested_speed = latest_requested_speed - latest_calculated_ground_speed_km_per_hour;
+    const float normalized_distance_to_requested_speed = map(distance_to_requested_speed, 0.0f, 5.0f, 0.0f, 1.0f);
+    printf("latest requested speed: %f\n", (double)latest_requested_speed);
+    printf("distance to requested speed: %f\n", (double)normalized_distance_to_requested_speed);
+    printf("current speed: %f\n", (double)latest_calculated_ground_speed_km_per_hour);
+    if (latest_calculated_ground_speed_km_per_hour < latest_requested_speed) {
+      motor_control_current_pwm += 0.01f;
+    } else if (latest_calculated_ground_speed_km_per_hour > latest_requested_speed) {
+      motor_control_current_pwm -= 0.01f;
+    } else {
+      ; // Speed is correct
+    }
+    pwm1__set_duty_cycle(pwm_channel_speed, motor_control_current_pwm);
+    break;
+  }
+  case SPEED_CONTROL_STATE__TRANSITION_TO_REVERSE_0: {
+    printf("state = SPEED_CONTROL_STATE__TRANSITION_TO_REVERSE_0\n");
+
+    current_state = SPEED_CONTROL_STATE__TRANSITION_TO_REVERSE_1;
+    motor_control_current_pwm = motor_speed_neutral;
+    pwm1__set_duty_cycle(pwm_channel_speed, motor_control_current_pwm);
+    break;
+  }
+  case SPEED_CONTROL_STATE__TRANSITION_TO_REVERSE_1: {
+    printf("state = SPEED_CONTROL_STATE__TRANSITION_TO_REVERSE_1\n");
+    motor_control_current_pwm = motor_reverse_threshold;
+    pwm1__set_duty_cycle(pwm_channel_speed, motor_control_current_pwm);
+    current_state = SPEED_CONTROL_STATE__REVERSE;
+    break;
+  }
+  case SPEED_CONTROL_STATE__REVERSE: {
+    if (latest_requested_speed > motor_speed_reverse_threshold &&
+        latest_requested_speed < motor_speed_forward_threshold) {
+      motor_control_current_pwm = motor_speed_neutral;
+      pwm1__set_duty_cycle(pwm_channel_speed, motor_control_current_pwm);
+      current_state = SPEED_CONTROL_STATE__STOPPED;
+      break;
+    }
+    printf("state = SPEED_CONTROL_STATE__REVERSE\n");
+    const float distance_to_requested_speed = latest_requested_speed - latest_calculated_ground_speed_km_per_hour;
+    const float normalized_distance_to_requested_speed = map(distance_to_requested_speed, -5.0f, 0.0f, 0.0f, 1.0f);
+    if (normalized_distance_to_requested_speed > 0.0f) {
+      motor_control_current_pwm -= normalized_distance_to_requested_speed * distance_to_requested_speed;
+    } else if (normalized_distance_to_requested_speed < 0.0f) {
+      motor_control_current_pwm += normalized_distance_to_requested_speed * distance_to_requested_speed;
+    } else {
+      ; // Speed is correct
+    }
+    pwm1__set_duty_cycle(pwm_channel_speed, motor_control_current_pwm);
+    break;
+  }
+  }
+  printf("requested speed: %f\ncurrent speed: %f\n", (double)latest_requested_speed,
+         (double)latest_calculated_ground_speed_km_per_hour);
+}
 
 void motor_control__handle_steering(void) {
   pwm1__set_duty_cycle(pwm_channel_steering, motor_control_state.current_steer_degrees_mapped);
@@ -261,6 +246,7 @@ void motor_control__update_speed_and_steering(dbc_DRIVER_MOTOR_CONTROL_s *messag
     motor_control_state.current_steer_degrees_mapped =
         map(message->DRIVER_MOTOR_CONTROL_STEER, steering_angle_minimum, steering_angle_maximum,
             steering_angle_minimum_mapped, steering_angle_maximum_mapped);
-    latest_requested_speed = map(message->DRIVER_MOTOR_CONTROL_SPEED_KPH, motor_speed_minimum, motor_speed_maximum, -5.0f, 5.0f);
+    latest_requested_speed =
+        map(message->DRIVER_MOTOR_CONTROL_SPEED_KPH, motor_speed_minimum, motor_speed_maximum, -5.0f, 5.0f);
   }
 }
