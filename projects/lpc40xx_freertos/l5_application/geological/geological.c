@@ -56,13 +56,12 @@ static float geological__private_compute_heading_degree(void) {
 
 static void geological__private_handle_compass() {
   compass_heading = compass__get_heading_degrees();
-  // printf("Compass heading degree: %f\n", (double)compass_heading);
+  printf("Compass heading degree: %f\n", (double)compass_heading);
 }
 
 static void geological__private_handle_gps() {
   current_coordinates = gps__get_coordinates();
-  // printf("Latitude: %f  Longitude: %f\n", (double)current_coordinates.latitude,
-  // (double)current_coordinates.longitude);
+  printf("Latitude: %f  Longitude: %f\n", (double)current_coordinates.latitude, (double)current_coordinates.longitude);
 }
 
 static void geological__private_compute_and_send_heading() {

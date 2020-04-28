@@ -65,7 +65,7 @@ static bool gps__private_verify_nmea_checksum(const char *gps_line, size_t line_
 }
 
 static void gps__private_handle_line(void) {
-  char gps_line[100U] = {0U};
+  char gps_line[300U] = {0U};
   const char *const delimiter = ",";
   while (line_buffer__remove_line(&line, gps_line, sizeof(gps_line)) &&
          gps__private_verify_nmea_checksum(gps_line, sizeof(gps_line))) {
@@ -161,10 +161,7 @@ static void gps__private_configure_for_nmea_gngga(void) {
   // char enable_gngga_message[] = {0xB5, 0x62, 0x06, 0x01, 0x08, 0x00, 0xF0, 0x00,
   //                                0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x28};
 
-  // Set Baudrate to 38400bps
-  // char set_baudrate_to_38400[] = {0xB5, 0x62, 0x06, 0x00, 0x14, 0x00, 0x01, 0x00, 0x00, 0x00, 0xD0, 0x08, 0x00, 0x00,
-  // 0x00, 0x96, 0x00, 0x00, 0x07, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x93, 0x90};
-  const char disable_all_nmea_messages_and_enable_gngga[] = {
+  const char disable_all_nmea_messages_except_gngga[] = {
       0xB5, 0x62, 0x06, 0x01, 0x08, 0x00, 0xF0, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2A, 0xB5,
       0x62, 0x06, 0x01, 0x08, 0x00, 0xF0, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x31, 0xB5, 0x62,
       0x06, 0x01, 0x08, 0x00, 0xF0, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x38, 0xB5, 0x62, 0x06,
@@ -172,8 +169,8 @@ static void gps__private_configure_for_nmea_gngga(void) {
       0x08, 0x00, 0xF0, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x46, 0x28};
 
   size_t i = 0;
-  while (disable_all_nmea_messages_and_enable_gngga[i] != 0x28) {
-    uart__put(gps_uart, disable_all_nmea_messages_and_enable_gngga[i], 0U);
+  while (disable_all_nmea_messages_except_gngga[i] != 0x28) {
+    uart__put(gps_uart, disable_all_nmea_messages_except_gngga[i], 0U);
     i++;
   }
 
@@ -209,19 +206,18 @@ void gps__init(void) {
   QueueHandle_t rxq_handle = xQueueCreate(300U, sizeof(char));
   QueueHandle_t txq_handle = xQueueCreate(300U, sizeof(char));
   (void)uart__enable_queues(gps_uart, rxq_handle, txq_handle);
-  // gps__private_configure_for_nmea_gngga();
 }
 
 void gps__run_once(void) {
   if (false == is_gps_configured) {
     is_gps_configured = true;
     gps__private_configure_for_nmea_gngga();
+    puts("Configured");
+    fflush(stdout);
   }
-
   gps__private_absorb_data();
   gps__private_handle_line();
   printf("GPS lock = %u\n\n", gps__private_get_gps_lock());
-  printf("parsed fix quality: %d\n", fix_quality);
   // if (is_gps_disconnected == true) {
   //   printf("GPS disconnected\n");
   // }

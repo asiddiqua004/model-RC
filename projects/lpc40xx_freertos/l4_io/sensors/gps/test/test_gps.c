@@ -52,9 +52,14 @@ static const size_t baud_rate_test = 9600U;
 
 static const char *gsg_string_negative = "$GPGGA,230612.015,1234.5678,S,12102.4634,W,0,04,5.7,508.3,M,,,,0000*04\r\n";
 static const char *gsg_string_positive = "$GPGGA,230612.015,1234.5678,N,12102.4634,E,0,04,5.7,508.3,M,,,,0000*0B\r\n";
+static const char *gsg_string_gps_lock = "$GPGGA,230612.015,1234.5678,N,12102.4634,E,1,04,5.7,508.3,M,,,,0000*0A\r\n";
 static const char *gsg_string_checksum_fail = "$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*48\r\n";
-static const char disable_gngll_message[] = {0xB5, 0x62, 0x06, 0x01, 0x08, 0x00, 0xF0, 0x01,
-                                             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2A};
+static const char configuration_messages[] = {
+    0xB5, 0x62, 0x06, 0x01, 0x08, 0x00, 0xF0, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2A, 0xB5,
+    0x62, 0x06, 0x01, 0x08, 0x00, 0xF0, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x31, 0xB5, 0x62,
+    0x06, 0x01, 0x08, 0x00, 0xF0, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x38, 0xB5, 0x62, 0x06,
+    0x01, 0x08, 0x00, 0xF0, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x3F, 0xB5, 0x62, 0x06, 0x01,
+    0x08, 0x00, 0xF0, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x46, 0x28};
 static const gps_coordinates_t parsed_coordinates_test_negative = {.latitude = -1234.5678f, .longitude = -12102.4634f};
 static const gps_coordinates_t parsed_coordinates_test_positive = {.latitude = 1234.5678f, .longitude = 12102.4634f};
 
@@ -91,12 +96,26 @@ static bool uart__get_stub_callback_positive(uart_e uart, char *input_byte, uint
   }
 }
 
+static bool uart__get_stub_callback_gps_lock(uart_e uart, char *input_byte, uint32_t timeout_ms, int call_count) {
+  UNUSED(uart);
+  UNUSED(timeout_ms);
+  if (call_count <= strlen(gsg_string_gps_lock)) {
+    *input_byte = gsg_string_gps_lock[call_count];
+    return true;
+  } else if (strlen(gsg_string_gps_lock) + 1 == call_count) {
+    return false;
+  } else {
+    TEST_FAIL_MESSAGE("uart__get_stub_callback_gps_lock called too many times");
+    return false;
+  }
+}
+
 static bool uart__put_stub_callback(uart_e uart, char output_byte, uint32_t timeout_ms, int call_count) {
   UNUSED(uart);
   UNUSED(timeout_ms);
-  uint8_t array_size = sizeof(disable_gngll_message) / sizeof(disable_gngll_message[0]);
+  size_t array_size = sizeof(configuration_messages) / sizeof(configuration_messages[0]);
   if (call_count <= array_size) {
-    output_byte = disable_gngll_message[call_count];
+    output_byte = configuration_messages[call_count];
     return true;
   } else if (array_size + 1 == call_count) {
     return false;
@@ -139,9 +158,17 @@ void test_gps_init(void) {
   gps__init();
 }
 
-void test_gps_run_once(void) {
+void test_gps__private_configure_for_nmea_gngga(void) {
   uart__put_StubWithCallback(uart__put_stub_callback);
-  uart__get_StubWithCallback(uart__get_stub_callback_negative);
+  gps__private_configure_for_nmea_gngga();
+}
+
+void test_gps_run_once(void) {
+  gpio_s gpio = {0U};
+  uart__put_StubWithCallback(uart__put_stub_callback);
+  uart__get_StubWithCallback(uart__get_stub_callback_gps_lock);
+  board_io__get_led3_ExpectAndReturn(gpio);
+  gpio__toggle_Expect(gpio);
   gps__run_once();
 }
 
@@ -198,4 +225,32 @@ void test_gps_verify_nmea_checksum(void) {
   const bool checksum_match_fail =
       gps__private_verify_nmea_checksum(gsg_string_checksum_fail, strlen(gsg_string_checksum_fail));
   TEST_ASSERT_FALSE(checksum_match_fail);
+}
+
+void test__get_gps_lock_invalid(void) {
+  test_gps_init_setup();
+  gps__init();
+  gpio_s gpio = {0U};
+
+  uart__get_StubWithCallback(uart__get_stub_callback_positive);
+  gps__private_absorb_data();
+  gps__private_handle_line();
+  board_io__get_led3_ExpectAndReturn(gpio);
+  gpio__set_Expect(gpio);
+  const bool gps_lock_invalid = gps__private_get_gps_lock();
+  TEST_ASSERT_FALSE(gps_lock_invalid);
+}
+
+void test__get_gps_lock_valid(void) {
+  test_gps_init_setup();
+  gps__init();
+  gpio_s gpio = {0U};
+
+  uart__get_StubWithCallback(uart__get_stub_callback_gps_lock);
+  gps__private_absorb_data();
+  gps__private_handle_line();
+  board_io__get_led3_ExpectAndReturn(gpio);
+  gpio__toggle_Expect(gpio);
+  const bool gps_lock_valid = gps__private_get_gps_lock();
+  TEST_ASSERT_TRUE(gps_lock_valid);
 }
