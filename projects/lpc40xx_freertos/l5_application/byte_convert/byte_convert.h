@@ -1,7 +1,6 @@
 /**
  * @file
- * Brief information about the code module
- *
+ * This module is used to convert data into "network byte order".
  */
 #pragma once
 

@@ -1,17 +1,24 @@
+/**
+ * @file
+ * The string_extractor module is used to extract a substring and copy it to a buffer.
+ */
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /***********************************************************************************************************************
  *
  *                                                  I N C L U D E S
  *
  **********************************************************************************************************************/
-/* Main Module Header */
-
-#include "midterm_module.h"
-
 /* Standard Includes */
+#include <stdbool.h>
 
 /* External Includes */
 
-/* Private Module Includes */
+/* Module Includes */
 
 /***********************************************************************************************************************
  *
@@ -27,25 +34,33 @@
 
 /***********************************************************************************************************************
  *
- *                             P R I V A T E   F U N C T I O N   D E C L A R A T I O N S
+ *                                     F U N C T I O N   D E C L A R A T I O N S
  *
  **********************************************************************************************************************/
 
-/***********************************************************************************************************************
+/**
+ * Extract a group of characters between a character
  *
- *                                  P R I V A T E   D A T A   D E F I N I T I O N S
+ * Assumption:
+ * - output_string is memory pointer that is at least the size of strlen(source)
  *
- **********************************************************************************************************************/
-static int bar(void) { return 1; }
-/***********************************************************************************************************************
+ * Behavior:
+ * - If 'between' char does not appear at least twice, return false
+ * - Given *source="hello 'world' 123", and between=' then *output_string should be set to "world"
  *
- *                                         P R I V A T E   F U N C T I O N S
+ * Another example:
+ * - *source = "value = 'one two three'"
+ * - between = ' (single quote)
+ * - *output_string should be set to "one two three"
  *
- **********************************************************************************************************************/
+ * @param source Input string, such as 'hello .123. world'
+ * @param output_string The output string is written here
+ * @param between The character between which we should extract a string
+ *
+ * @returns true if a string has been extracted correctly
+ */
+bool string_extractor__extract_string_between(const char *source, char *output_string, char between);
 
-/***********************************************************************************************************************
- *
- *                                          P U B L I C   F U N C T I O N S
- *
- **********************************************************************************************************************/
-int foo(void) { return 1; }
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
