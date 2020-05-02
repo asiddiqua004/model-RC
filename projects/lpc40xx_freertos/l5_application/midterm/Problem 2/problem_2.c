@@ -3,16 +3,17 @@
  *                                                  I N C L U D E S
  *
  **********************************************************************************************************************/
-/* Standard Includes */
-#include "unity.h"
+/* Main Module Header */
 
-/* Mock Includes */
+#include "problem_2.h"
+
+/* Standard Includes */
+
+#include <string.h>
 
 /* External Includes */
 
-/* Module Includes */
-
-#include "midterm.h"
+/* Private Module Includes */
 
 /***********************************************************************************************************************
  *
@@ -46,20 +47,31 @@
 
 /***********************************************************************************************************************
  *
- *                                     T E S T   S E T U P   &   T E A R D O W N
- *
- **********************************************************************************************************************/
-void setUp(void) {}
-
-void tearDown(void) {}
-
-/***********************************************************************************************************************
- *
- *                                                     T E S T S
+ *                                          P U B L I C   F U N C T I O N S
  *
  **********************************************************************************************************************/
 
-void test_sample(void) {
-  const bool sample_result = sample();
-  TEST_ASSERT_TRUE(sample_result);
+bool extract_string_between(const char *source, char *output_string, char between) {
+  bool extracted_status = source && output_string;
+
+  char *p1 = NULL;
+  char *p2 = NULL;
+    size_t substring_len = 0;
+
+  if (extracted_status){
+      p1 = strchr(source, between);
+
+  }
+    if (extracted_status){
+      p2 = strrchr(p1 + 1, between);
+
+  }
+    if (extracted_status){
+      substring_len = p2 - p1;
+      extracted_status = substring_len > 1;
+
+  }
+  if (extracted_status){
+      snprintf(output_string, substring_len, "%s")
+  }
 }
