@@ -11,6 +11,7 @@ void tearDown(void) {}
 void test_adc_implementation__initialization(void) {
   gpio_s gpio = {0};
   gpio__construct_with_function_ExpectAndReturn(GPIO__PORT_0, 25, GPIO__FUNCTION_1, gpio);
+  gpio__set_as_input_Expect(gpio);
   adc__initialize_Expect();
 
   adc_implementation__initialization();
