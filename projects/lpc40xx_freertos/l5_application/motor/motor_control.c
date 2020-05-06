@@ -183,9 +183,9 @@ void motor_control__handle_speed(void) {
     printf("distance to requested speed: %f\n", (double)normalized_distance_to_requested_speed);
     printf("current speed: %f\n", (double)latest_calculated_ground_speed_km_per_hour);
     if (latest_calculated_ground_speed_km_per_hour < latest_requested_speed) {
-      motor_control_current_pwm += 0.01f;
+      motor_control_current_pwm += 0.005f;
     } else if (latest_calculated_ground_speed_km_per_hour > latest_requested_speed) {
-      motor_control_current_pwm -= 0.01f;
+      motor_control_current_pwm -= 0.005f;
     } else {
       ; // Speed is correct
     }
@@ -208,23 +208,32 @@ void motor_control__handle_speed(void) {
     break;
   }
   case SPEED_CONTROL_STATE__REVERSE: {
-    if (latest_requested_speed > motor_speed_reverse_threshold &&
-        latest_requested_speed < motor_speed_forward_threshold) {
+    if (-latest_requested_speed > motor_speed_reverse_threshold &&
+        -latest_requested_speed < motor_speed_forward_threshold) {
       motor_control_current_pwm = motor_speed_neutral;
       pwm1__set_duty_cycle(pwm_channel_speed, motor_control_current_pwm);
       current_state = SPEED_CONTROL_STATE__STOPPED;
       break;
     }
     printf("state = SPEED_CONTROL_STATE__REVERSE\n");
-    const float distance_to_requested_speed = latest_requested_speed - latest_calculated_ground_speed_km_per_hour;
-    const float normalized_distance_to_requested_speed = map(distance_to_requested_speed, -5.0f, 0.0f, 0.0f, 1.0f);
-    if (normalized_distance_to_requested_speed > 0.0f) {
-      motor_control_current_pwm -= normalized_distance_to_requested_speed * distance_to_requested_speed;
-    } else if (normalized_distance_to_requested_speed < 0.0f) {
-      motor_control_current_pwm += normalized_distance_to_requested_speed * distance_to_requested_speed;
+    // const float distance_to_requested_speed = latest_requested_speed - latest_calculated_ground_speed_km_per_hour;
+    // const float normalized_distance_to_requested_speed = map(distance_to_requested_speed, -5.0f, 0.0f, 0.0f, 1.0f);
+    // if (normalized_distance_to_requested_speed > 0.0f) {
+    //   motor_control_current_pwm -= normalized_distance_to_requested_speed * distance_to_requested_speed;
+    // } else if (normalized_distance_to_requested_speed < 0.0f) {
+    //   motor_control_current_pwm += normalized_distance_to_requested_speed * distance_to_requested_speed;
+    // } else {
+    //   ; // Speed is correct
+    // }
+
+    if (-latest_calculated_ground_speed_km_per_hour < latest_requested_speed) {
+      motor_control_current_pwm -= 0.01f;
+    } else if (-latest_calculated_ground_speed_km_per_hour > latest_requested_speed) {
+      motor_control_current_pwm += 0.01f;
     } else {
       ; // Speed is correct
     }
+
     pwm1__set_duty_cycle(pwm_channel_speed, motor_control_current_pwm);
     break;
   }
