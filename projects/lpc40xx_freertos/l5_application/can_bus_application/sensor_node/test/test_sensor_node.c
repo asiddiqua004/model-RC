@@ -102,7 +102,7 @@ void test_sensor_node__handle_mia(void) {
   sensor_node__handle_mia(mia_increment_counter);
 
   board_io__get_led0_ExpectAndReturn(gpio);
-  gpio__set_Expect(gpio);
+  gpio__reset_Expect(gpio);
 
   // Second 10 Hz cycle triggers prints and gpio toggle
   sensor_node__handle_mia(mia_increment_counter);
@@ -120,7 +120,7 @@ void test_sensor_node__handle_multiple_driver_heartbeat_messages_over_can(void) 
   can__rx_ReturnThruPtr_can_message_ptr(&msg);
 
   board_io__get_led0_ExpectAndReturn(gpio);
-  gpio__reset_Expect(gpio);
+  gpio__set_Expect(gpio);
 
   // Heartbeat found
   can__rx_ExpectAndReturn(can1, NULL, 0, true);

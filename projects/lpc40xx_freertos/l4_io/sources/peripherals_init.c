@@ -34,7 +34,7 @@ void peripherals_init(void) {
 
 static void peripherals_init__startup_sequence(void) {
   const gpio_s leds[] = {board_io__get_led0(), board_io__get_led1(), board_io__get_led2(), board_io__get_led3()};
-  for (size_t number = 0; number < 32; number++) {
+  for (size_t number = 0; number < 28; number++) {
     gpio__toggle(leds[number % ARRAY_SIZE(leds)]);
     delay__ms(50);
   }

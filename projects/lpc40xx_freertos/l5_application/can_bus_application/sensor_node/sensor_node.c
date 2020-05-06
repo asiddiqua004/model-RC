@@ -75,7 +75,7 @@ void sensor_node__handle_mia(const uint32_t mia_increment_value) {
   if (dbc_service_mia_DRIVER_HEARTBEAT(&can_msg_driver_heartbeat, mia_increment_value)) {
     puts("driver missing\r\n");
     sensor_node__is_sync = false;
-    gpio__set(board_io__get_led0());
+    gpio__reset(board_io__get_led0());
   }
 }
 
@@ -85,7 +85,7 @@ static void sensor_node__handle_driver_heartbeat_message(const dbc_message_heade
     if (!sensor_node__is_sync) {
       puts("sensor sync\r\n");
       sensor_node__is_sync = true;
-      gpio__reset(board_io__get_led0());
+      gpio__set(board_io__get_led0());
     }
   }
 }
