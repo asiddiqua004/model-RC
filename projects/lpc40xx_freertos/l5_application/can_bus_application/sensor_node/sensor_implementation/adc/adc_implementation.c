@@ -4,8 +4,10 @@
 #include "gpio.h"
 
 void adc_implementation__initialization(void) {
-  gpio_s adc_channel = gpio__construct_with_function(GPIO__PORT_0, 25U, GPIO__FUNCTION_1); // ADC02: P0.25
-  gpio__set_as_input(adc_channel);
+  gpio_s adc_gpio = gpio__construct_with_function(GPIO__PORT_0, 25U, GPIO__FUNCTION_1); // ADC02: P0.25
+  gpio__set_as_input(adc_gpio);
+  gpio__enable_ad_mode(adc_gpio);
+  gpio__enable_inactive_mode(adc_gpio);
   adc__initialize();
 }
 

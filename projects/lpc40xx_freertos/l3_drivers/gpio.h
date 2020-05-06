@@ -57,6 +57,12 @@ void gpio__enable_open_drain(gpio_s gpio);
 /// Sets the function mode of a pin to enable pull down resistors
 void gpio__enable_pull_down_resistors(gpio_s gpio);
 
+// Sets function mode of a pin to inactive
+void gpio__enable_inactive_mode(gpio_s gpio);
+
+/// Enables ADC mode of an ADC compatible pin
+void gpio__enable_ad_mode(gpio_s gpio);
+
 /**
  * @{
  * @name Sets direction of the pin if used as an input/output pin
