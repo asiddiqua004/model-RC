@@ -44,22 +44,22 @@ void test_wifi_message_handler__set_GPS_headings_parse_negative(void) {
   const char *line = "-123.456789,-987.654321";
 
   wifi_message_handler__set_GPS_headings(line, strlen(line));
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), -123.456789);
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), -987.654321);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), 1123.456789);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), 1987.654321);
 }
 
 void test_wifi_message_handler__set_GPS_headings_parse_positive_and_negative(void) {
   const char *line = "-123.456789,+987.654321";
 
   wifi_message_handler__set_GPS_headings(line, strlen(line));
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), -123.456789);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), 1123.456789);
   TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), 987.654321);
 
   const char *second_line = "+123.456789,-987.654321";
 
   wifi_message_handler__set_GPS_headings(second_line, strlen(second_line));
   TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), 123.456789);
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), -987.654321);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), 1987.654321);
 }
 
 void test_wifi_message_handler__set_GPS_headings_parse_incorrect_length(void) {
@@ -98,14 +98,14 @@ void test_wifi_message_handler__parse_GPS_headings_lines(void) {
   const char *second_line = "#-555.666666,-777.888888";
 
   wifi_message_handler__parse_line(second_line, strlen(second_line));
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), -555.666666);
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), -777.888888);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), 1555.666666);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), 1777.888888);
 
   const char *third_line = "#incorrect";
 
   wifi_message_handler__parse_line(third_line, strlen(third_line));
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), -555.666666);
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), -777.888888);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), 1555.666666);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), 1777.888888);
 }
 
 void test_wifi_message_handler__parse_all_lines(void) {
@@ -124,14 +124,14 @@ void test_wifi_message_handler__parse_all_lines(void) {
   const char *third_line = "#-555.666666,-777.888888";
 
   wifi_message_handler__parse_line(third_line, strlen(third_line));
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), -555.666666);
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), -777.888888);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), 1555.666666);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), 1777.888888);
 
   const char *fourth_line = "#incorrect";
 
   wifi_message_handler__parse_line(fourth_line, strlen(fourth_line));
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), -555.666666);
-  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), -777.888888);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_latitude(), 1555.666666);
+  TEST_ASSERT_EQUAL_FLOAT(wifi_message_handler__get_GPS_headings_longitude(), 1777.888888);
 
   const char *fifth_line = "$stop";
 

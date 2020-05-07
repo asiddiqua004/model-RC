@@ -35,11 +35,11 @@ static void wifi_message_handler__set_GPS_headings(const char *line, const size_
     GPS_headings_longitude = atof(longitude);
 
     if (latitude_sign == '-') {
-      GPS_headings_latitude *= -1;
+      GPS_headings_latitude += 1000;
     }
 
     if (longitude_sign == '-') {
-      GPS_headings_longitude *= -1;
+      GPS_headings_longitude += 1000;
     }
   }
 }
