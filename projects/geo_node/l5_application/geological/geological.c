@@ -92,5 +92,13 @@ void geological__run_once(void) {
 
 void geological__update_destination_coordinates(dbc_BRIDGE_SENSOR_GPS_HEADINGS_s *new_coordinates) {
   destination_coordinates.longitude = new_coordinates->BRIDGE_SENSOR_GPS_HEADINGS_LONGITUDE;
+  if (destination_coordinates.longitude > 1000) {
+    destination_coordinates.longitude -= 1000;
+    destination_coordinates.longitude *= -1;
+  }
   destination_coordinates.latitude = new_coordinates->BRIDGE_SENSOR_GPS_HEADINGS_LATITUDE;
+  if (destination_coordinates.latitude > 1000) {
+    destination_coordinates.latitude -= 1000;
+    destination_coordinates.latitude *= -1;
+  }
 }
