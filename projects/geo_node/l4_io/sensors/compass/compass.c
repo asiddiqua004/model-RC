@@ -25,6 +25,14 @@ static const uint8_t COMPASS__EXPECTED_ID = 72U;
 static const i2c_e COMPASS__BUS = I2C__2;
 static const uint8_t COMPASS__ADDRESS = 0x3C;
 static uint8_t mode;
+static float max_x = 0;
+static float max_y = 0;
+static float min_x = 0;
+static float min_y = 0;
+static float offset_x = 0;
+static float offset_y = 0;
+static float fixed_offset_x = 9.0;
+static float fixed_offset_y = 19.5;
 
 #define M_PI 3.14159265358979323846264338327950288
 
@@ -36,7 +44,7 @@ static uint8_t mode;
 
 static float compass__private_compute_heading(compass__axis_data_t axis_data) {
   // Reference: https://github.com/adafruit/Adafruit_HMC5883_Unified/blob/master/examples/magsensor/magsensor.ino
-  float compass_heading = atan2f(axis_data.y, axis_data.x);
+  float compass_heading = atan2f((axis_data.x - fixed_offset_x), (axis_data.y - fixed_offset_y)) + (float)M_PI;
 
   const float compass_declination_angle = 0.23f; // http://www.magnetic-declination.com
   compass_heading += compass_declination_angle;
@@ -97,6 +105,9 @@ float compass__get_heading_degrees(void) {
 
   const float compass_heading_degrees = compass__private_compute_heading(axis_data) * 180.0f / (float)M_PI;
 
+  // Enable this only when calibration is necessary
+  // compass__calibrate(axis_data);
+
   return compass_heading_degrees;
 }
 
@@ -109,4 +120,37 @@ void compass__set_mode(uint8_t new_mode) {
   i2c__write_single(COMPASS__BUS, COMPASS__ADDRESS, COMPASS__MEMORY_MODE_REG,
                     new_mode << (COMPASS__MODE_REG_BIT - COMPASS__MODE_REG_LENGTH + 1));
   mode = new_mode;
+}
+
+void compass__calibrate(compass__axis_data_t axis_data) {
+  for (size_t i = 0; i < 500; i++) {
+    // Get max values for x and y
+    if (axis_data.x > max_x) {
+      max_x = axis_data.x;
+    }
+    if (axis_data.y > max_y) {
+      max_y = axis_data.y;
+    }
+
+    // Get min values for x and y
+    if (axis_data.x < min_x) {
+      min_x = axis_data.x;
+    }
+    if (axis_data.y < min_y) {
+      min_y = axis_data.y;
+    }
+  }
+
+  // Calculate offset of x and y
+  offset_x = (max_x + min_x) / 2.0f;
+  offset_y = (max_y + min_y) / 2.0f;
+
+  printf("max x_axis = %f\n", (double)max_x);
+  printf("min x_axis = %f\n", (double)min_x);
+
+  printf("max y_axis = %f\n", (double)max_y);
+  printf("min y_axis = %f\n", (double)min_y);
+
+  printf("offset x_axis = %f\n", (double)offset_x);
+  printf("offset y_axis = %f\n", (double)offset_y);
 }

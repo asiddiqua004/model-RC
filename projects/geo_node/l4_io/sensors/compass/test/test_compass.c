@@ -80,6 +80,6 @@ void test_compass__get_heading_degrees(void) {
   i2c__write_single_ExpectAnyArgsAndReturn(1);
 
   const float compass_heading_degrees = compass__private_compute_heading(axis_data) * 180.0f / (float)M_PI;
-  TEST_ASSERT_EQUAL(299.123427, compass_heading_degrees);
+  TEST_ASSERT_EQUAL(359.0f, compass_heading_degrees);
   compass__get_heading_degrees();
 }
