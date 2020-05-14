@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "acceleration.h"
 #include "compass.h"
 #include "i2c.h"
 
@@ -33,6 +34,7 @@ static float offset_x = 0;
 static float offset_y = 0;
 static float fixed_offset_x = 9.0;
 static float fixed_offset_y = 19.5;
+static float accel_scale = 2;
 
 #define M_PI 3.14159265358979323846264338327950288
 
@@ -42,9 +44,25 @@ static float fixed_offset_y = 19.5;
  *
  ******************************************************************************/
 
-static float compass__private_compute_heading(compass__axis_data_t axis_data) {
+static float compass__private_compute_heading(compass__axis_data_t magnetometer_axis) {
+
+  // Calculated accelerometer values for x,y in m/s^2
+  float accel_x = (float)acceleration__get_data().x / (float)(1 << 11) * accel_scale;
+  float accel_y = (float)acceleration__get_data().y / (float)(1 << 11) * accel_scale;
+
+  // Reference: https://www.pololu.com/file/0J434/LSM303DLH-compass-app-note.pdf
+  float pitch = asin(-accel_x);
+  float roll = asin(accel_y / (float)cos(pitch));
+
+  // Tilt compensated magnetic sensor values for x and y
+  float magnetometer_x =
+      (magnetometer_axis.x - fixed_offset_x) * (float)cos(pitch) + magnetometer_axis.z * (float)sin(pitch);
+  float magnetometer_y = (magnetometer_axis.x - fixed_offset_x) * (float)sin(roll) * (float)sin(pitch) +
+                         (magnetometer_axis.y - fixed_offset_y) * (float)cos(roll) -
+                         magnetometer_axis.z * (float)sin(roll) * (float)cos(pitch);
+
   // Reference: https://github.com/adafruit/Adafruit_HMC5883_Unified/blob/master/examples/magsensor/magsensor.ino
-  float compass_heading = atan2f((axis_data.x - fixed_offset_x), (axis_data.y - fixed_offset_y)) + (float)M_PI;
+  float compass_heading = atan2f(magnetometer_x, magnetometer_y) - (float)M_PI;
 
   const float compass_declination_angle = 0.23f; // http://www.magnetic-declination.com
   compass_heading += compass_declination_angle;

@@ -5,6 +5,7 @@
 #include <string.h>
 
 // Mocks
+#include "Mockacceleration.h"
 #include "Mockgpio.h"
 #include "Mocki2c.h"
 
@@ -75,11 +76,18 @@ void test_compass__init(void) {
 }
 
 void test_compass__get_heading_degrees(void) {
+  acceleration__axis_data_s accel_data = {};
   compass__axis_data_t axis_data = {.x = 100.0f, .y = -350.0f};
   i2c__read_slave_data_ExpectAnyArgsAndReturn(1);
   i2c__write_single_ExpectAnyArgsAndReturn(1);
 
+  acceleration__get_data_ExpectAndReturn(accel_data);
+  acceleration__get_data_ExpectAndReturn(accel_data);
+  acceleration__get_data_ExpectAndReturn(accel_data);
+  acceleration__get_data_ExpectAndReturn(accel_data);
+
   const float compass_heading_degrees = compass__private_compute_heading(axis_data) * 180.0f / (float)M_PI;
+
   TEST_ASSERT_EQUAL(359.0f, compass_heading_degrees);
   compass__get_heading_degrees();
 }
