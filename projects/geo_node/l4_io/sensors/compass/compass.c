@@ -30,10 +30,8 @@ static float max_x = 0;
 static float max_y = 0;
 static float min_x = 0;
 static float min_y = 0;
-static float offset_x = 0;
-static float offset_y = 0;
-static float fixed_offset_x = 9.0;
-static float fixed_offset_y = 19.5;
+static float fixed_offset_x = -11.0;
+static float fixed_offset_y = 30.709679;
 static float accel_scale = 2;
 
 #define M_PI 3.14159265358979323846264338327950288
@@ -141,33 +139,37 @@ void compass__set_mode(uint8_t new_mode) {
 }
 
 void compass__calibrate(compass__axis_data_t axis_data) {
+
+  // Reference: http://www.cypress.com/file/130456/download
   for (size_t i = 0; i < 500; i++) {
     // Get max values for x and y
-    if (axis_data.x > max_x) {
-      max_x = axis_data.x;
-    }
-    if (axis_data.y > max_y) {
-      max_y = axis_data.y;
-    }
+    max_x = axis_data.x > max_x ? axis_data.x : max_x;
+    max_y = axis_data.y > max_y ? axis_data.y : max_y;
 
     // Get min values for x and y
-    if (axis_data.x < min_x) {
-      min_x = axis_data.x;
-    }
-    if (axis_data.y < min_y) {
-      min_y = axis_data.y;
-    }
+    min_x = axis_data.x < min_x ? axis_data.x : min_x;
+    min_y = axis_data.y < min_y ? axis_data.y : min_y;
   }
 
-  // Calculate offset of x and y
-  offset_x = (max_x + min_x) / 2.0f;
-  offset_y = (max_y + min_y) / 2.0f;
+  // Calculate scale factors for x and y for soft-iron distortion
+  float a = ((max_y - min_y) / (max_x - min_x));
+  float b = ((max_x - min_x) / (max_y - min_y));
+
+  float x_scale = a > 1.0f ? a : 1.0f;
+  float y_scale = b > 1.0f ? b : 1.0f;
+
+  // Calculate offset of x and y for hard-iron distortion
+  float offset_x = ((max_x + min_x) / 2.0f) * x_scale;
+  float offset_y = ((max_y + min_y) / 2.0f) * y_scale;
 
   printf("max x_axis = %f\n", (double)max_x);
   printf("min x_axis = %f\n", (double)min_x);
 
   printf("max y_axis = %f\n", (double)max_y);
   printf("min y_axis = %f\n", (double)min_y);
+
+  printf("scale factor x_axis = %f\n", (double)x_scale);
+  printf("scale factor y_axis = %f\n", (double)y_scale);
 
   printf("offset x_axis = %f\n", (double)offset_x);
   printf("offset y_axis = %f\n", (double)offset_y);
