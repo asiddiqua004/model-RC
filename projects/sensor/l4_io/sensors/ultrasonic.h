@@ -10,6 +10,7 @@ typedef struct ultrasonic {
   uint64_t last_trigger_time_us;
   uint64_t time_of_flight_us;
   bool start_new_reading;
+  bool obtained_ranging;
   gpio_s trigger_out;
   gpio_s echo_in;
 } ultrasonic_s;
