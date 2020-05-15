@@ -14,9 +14,9 @@ uint8_t avg_buffer__get_value(avg_buffer_s *avg_buffer) {
   size_t sum = 0;
   uint8_t avg = 0;
 
-  const size_t capacity = avg_buffer->filled ? avg_buffer->capacity : avg_buffer->write_index;
+  const size_t capacity = avg_buffer__get_insertions(avg_buffer);
 
-  if (capacity > 0) {
+  if (capacity) {
     for (size_t i = 0; i < capacity; i++) {
       sum += avg_buffer->buffer[i];
     }
