@@ -117,3 +117,4 @@ bool compass__init(void);
 float compass__get_heading_degrees(void);
 void compass__set_gain(uint8_t gain);
 void compass__set_mode(uint8_t mode);
+void compass__calibrate(compass__axis_data_t axis_data);

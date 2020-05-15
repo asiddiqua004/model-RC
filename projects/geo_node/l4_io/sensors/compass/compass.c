@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "acceleration.h"
 #include "compass.h"
 #include "i2c.h"
 
@@ -25,6 +26,13 @@ static const uint8_t COMPASS__EXPECTED_ID = 72U;
 static const i2c_e COMPASS__BUS = I2C__2;
 static const uint8_t COMPASS__ADDRESS = 0x3C;
 static uint8_t mode;
+static float max_x = 0;
+static float max_y = 0;
+static float min_x = 0;
+static float min_y = 0;
+static float fixed_offset_x = -11.0;
+static float fixed_offset_y = 30.709679;
+static float accel_scale = 2;
 
 #define M_PI 3.14159265358979323846264338327950288
 
@@ -34,9 +42,25 @@ static uint8_t mode;
  *
  ******************************************************************************/
 
-static float compass__private_compute_heading(compass__axis_data_t axis_data) {
+static float compass__private_compute_heading(compass__axis_data_t magnetometer_axis) {
+
+  // Calculated accelerometer values for x,y in m/s^2
+  float accel_x = (float)acceleration__get_data().x / (float)(1 << 11) * accel_scale;
+  float accel_y = (float)acceleration__get_data().y / (float)(1 << 11) * accel_scale;
+
+  // Reference: https://www.pololu.com/file/0J434/LSM303DLH-compass-app-note.pdf
+  float pitch = asin(-accel_x);
+  float roll = asin(accel_y / (float)cos(pitch));
+
+  // Tilt compensated magnetic sensor values for x and y
+  float magnetometer_x =
+      (magnetometer_axis.x - fixed_offset_x) * (float)cos(pitch) + magnetometer_axis.z * (float)sin(pitch);
+  float magnetometer_y = (magnetometer_axis.x - fixed_offset_x) * (float)sin(roll) * (float)sin(pitch) +
+                         (magnetometer_axis.y - fixed_offset_y) * (float)cos(roll) -
+                         magnetometer_axis.z * (float)sin(roll) * (float)cos(pitch);
+
   // Reference: https://github.com/adafruit/Adafruit_HMC5883_Unified/blob/master/examples/magsensor/magsensor.ino
-  float compass_heading = atan2f(axis_data.y, axis_data.x);
+  float compass_heading = atan2f(magnetometer_x, magnetometer_y) - (float)M_PI;
 
   const float compass_declination_angle = 0.23f; // http://www.magnetic-declination.com
   compass_heading += compass_declination_angle;
@@ -97,6 +121,9 @@ float compass__get_heading_degrees(void) {
 
   const float compass_heading_degrees = compass__private_compute_heading(axis_data) * 180.0f / (float)M_PI;
 
+  // Enable this only when calibration is necessary
+  // compass__calibrate(axis_data);
+
   return compass_heading_degrees;
 }
 
@@ -109,4 +136,41 @@ void compass__set_mode(uint8_t new_mode) {
   i2c__write_single(COMPASS__BUS, COMPASS__ADDRESS, COMPASS__MEMORY_MODE_REG,
                     new_mode << (COMPASS__MODE_REG_BIT - COMPASS__MODE_REG_LENGTH + 1));
   mode = new_mode;
+}
+
+void compass__calibrate(compass__axis_data_t axis_data) {
+
+  // Reference: http://www.cypress.com/file/130456/download
+  for (size_t i = 0; i < 500; i++) {
+    // Get max values for x and y
+    max_x = axis_data.x > max_x ? axis_data.x : max_x;
+    max_y = axis_data.y > max_y ? axis_data.y : max_y;
+
+    // Get min values for x and y
+    min_x = axis_data.x < min_x ? axis_data.x : min_x;
+    min_y = axis_data.y < min_y ? axis_data.y : min_y;
+  }
+
+  // Calculate scale factors for x and y for soft-iron distortion
+  float a = ((max_y - min_y) / (max_x - min_x));
+  float b = ((max_x - min_x) / (max_y - min_y));
+
+  float x_scale = a > 1.0f ? a : 1.0f;
+  float y_scale = b > 1.0f ? b : 1.0f;
+
+  // Calculate offset of x and y for hard-iron distortion
+  float offset_x = ((max_x + min_x) / 2.0f) * x_scale;
+  float offset_y = ((max_y + min_y) / 2.0f) * y_scale;
+
+  printf("max x_axis = %f\n", (double)max_x);
+  printf("min x_axis = %f\n", (double)min_x);
+
+  printf("max y_axis = %f\n", (double)max_y);
+  printf("min y_axis = %f\n", (double)min_y);
+
+  printf("scale factor x_axis = %f\n", (double)x_scale);
+  printf("scale factor y_axis = %f\n", (double)y_scale);
+
+  printf("offset x_axis = %f\n", (double)offset_x);
+  printf("offset y_axis = %f\n", (double)offset_y);
 }
