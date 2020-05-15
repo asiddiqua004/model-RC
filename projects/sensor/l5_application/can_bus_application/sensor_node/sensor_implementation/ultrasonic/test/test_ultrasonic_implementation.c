@@ -1,5 +1,6 @@
 #include "unity.h"
 
+#include "Mockavg_buffer.h"
 #include "Mockgpio2_interrupts.h"
 #include "Mocksys_time.h"
 #include "Mockultrasonic.h"
@@ -26,6 +27,16 @@ void test_ultrasonic_implementation__initialize(void) {
   gpio2_interrupts__attach_handler_Expect(4U, FALLING, NULL);
   gpio2_interrupts__attach_handler_IgnoreArg_isr_handler();
   gpio2_interrupts__initialize_Expect();
+
+  avg_buffer_s avg_buffer = {0};
+  uint8_t buffer[5] = {0};
+  const size_t avg_buffer_capacity = 5;
+
+  // Initialize averaging buffers
+  avg_buffer__initialize_Expect(&avg_buffer, buffer, avg_buffer_capacity);
+  avg_buffer__initialize_Expect(&avg_buffer, buffer, avg_buffer_capacity);
+  avg_buffer__initialize_Expect(&avg_buffer, buffer, avg_buffer_capacity);
+  avg_buffer__initialize_Expect(&avg_buffer, buffer, avg_buffer_capacity);
 
   ultrasonic_implementation__initialize();
 }

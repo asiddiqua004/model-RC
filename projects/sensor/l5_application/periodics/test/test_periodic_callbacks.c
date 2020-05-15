@@ -40,8 +40,8 @@ void test__periodic_callbacks__10Hz(void) {
 }
 
 void test__periodic_callbacks__100Hz(void) {
-  can_bus_handler__collect_data_20Hz_Expect();
+  can_bus_handler__collect_data_50Hz_Expect();
   can_bus_handler__handle_wifi_transmissions_100Hz_Expect();
 
-  periodic_callbacks__100Hz(5);
+  periodic_callbacks__100Hz(2);
 }
