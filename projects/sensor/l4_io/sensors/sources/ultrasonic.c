@@ -2,6 +2,7 @@
 
 #include <math.h>
 
+#include "delay.h"
 #include "sys_time.h"
 
 /**
@@ -39,6 +40,7 @@ void ultrasonic__initialize(ultrasonic_s *ultrasonic, gpio__port_e trigger_port,
   ultrasonic->time_of_flight_us = 0U;
   ultrasonic->last_trigger_time_us = 0U;
   ultrasonic->start_new_reading = true;
+  ultrasonic->obtained_ranging = false;
 
   gpio__reset(ultrasonic->trigger_out);
 }
@@ -78,11 +80,8 @@ void ultrasonic__initiate_range(ultrasonic_s *ultrasonic) {
   // Send trigger on the start of a new reading through interrupts or when a 60 ms timeout occurs
   if (ultrasonic->start_new_reading || (sys_time__get_uptime_us() - ultrasonic->last_trigger_time_us) > 60000U) {
     ultrasonic->start_new_reading = false;
-    const uint64_t timer = sys_time__get_uptime_us();
     gpio__set(ultrasonic->trigger_out);
-    while ((sys_time__get_uptime_us() - timer) < 10U) {
-      ; // Hold trigger line high for 10 microseconds
-    }
+    delay__us(10U); // Hold trigger line high for 10 microseconds
     gpio__reset(ultrasonic->trigger_out);
     ultrasonic->last_trigger_time_us = sys_time__get_uptime_us();
   }

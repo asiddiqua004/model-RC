@@ -23,6 +23,6 @@ void can_bus_handler__handle_all_incoming_messages_10Hz(void) {
   sensor_node__handle_messages_over_can();
 }
 
-void can_bus_handler__collect_data_20Hz(void) { sensor_node__collect_data(); }
+void can_bus_handler__collect_data_50Hz(void) { sensor_node__collect_data(); }
 
 void can_bus_handler__handle_wifi_transmissions_100Hz(void) { sensor_node__handle_wifi_transmissions(); }
