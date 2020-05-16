@@ -37,7 +37,7 @@ void test_can_bus_handler__handle_all_incoming_messages_10Hz(void) {
 void test_can_bus_handler__collect_data_50Hz(void) {
   sensor_node__collect_data_Expect();
 
-  can_bus_handler__collect_data_50Hz();
+  can_bus_handler__collect_data_100Hz();
 }
 
 void test_can_bus_handler__handle_wifi_transmissions_100Hz(void) {

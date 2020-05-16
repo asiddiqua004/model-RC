@@ -451,26 +451,16 @@ class CodeWriter(object):
             )
 
             # When using MIN_OF/MAX_OF macros, we need to use 'f' notation to explicitly use float rather than double
-<<<<<<< site_scons/site_tools/codegen/code_writer.py
-            minimum = str(signal.minimum) + 'f' if signal_is_float else str(signal.minimum)
-            maximum = str(signal.maximum) + 'f' if signal_is_float else str(signal.maximum)
-            minimum = re.sub(r'(?<!\.)0f$', '0.0f', minimum)
-            maximum = re.sub(r'(?<!\.)0f$', '0.0f', maximum)
-
-=======
             minimum = (
                 str(signal.minimum) + "f" if signal_is_float else str(signal.minimum)
             )
+
             maximum = (
                 str(signal.maximum) + "f" if signal_is_float else str(signal.maximum)
             )
-<<<<<<< site_scons/site_tools/codegen/code_writer.py
-            minimum = re.sub(r"(?<!\.)0f$", "0.0f", minimum)
-            maximum = re.sub(r"(?<!\.)0f$", "0.0f", maximum)
-=======
+
             minimum = re.sub(r'(?<!\.)0f$', '0.0f', minimum)
             maximum = re.sub(r'(?<!\.)0f$', '0.0f', maximum)
->>>>>>> site_scons/site_tools/codegen/code_writer.py
 
             raw_sig_code = "  {0} = ((uint64_t)(((MAX_OF(MIN_OF({1}message->{2},{3}),{4}) - ({5})) / {6}f) + 0.5f))".format(
                 raw_sig_name,
