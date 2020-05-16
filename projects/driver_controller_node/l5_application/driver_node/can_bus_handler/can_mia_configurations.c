@@ -1,0 +1,25 @@
+#include "tesla_model_rc.h"
+
+const uint32_t dbc_mia_threshold_BRIDGE_SENSOR_SONARS = 300;
+const dbc_BRIDGE_SENSOR_SONARS_s dbc_mia_replacement_BRIDGE_SENSOR_SONARS;
+
+const uint32_t dbc_mia_threshold_GEO_GPS_COMPASS_HEADINGS = 300;
+const dbc_GEO_GPS_COMPASS_HEADINGS_s dbc_mia_replacement_GEO_GPS_COMPASS_HEADINGS;
+
+const uint32_t dbc_mia_threshold_BRIDGE_SENSOR_VOLTAGE = 300;
+const dbc_BRIDGE_SENSOR_VOLTAGE_s dbc_mia_replacement_BRIDGE_SENSOR_VOLTAGE;
+
+const uint32_t dbc_mia_threshold_BRIDGE_SENSOR_VEHICLE_NAVIGATION_STATE = 300;
+const dbc_BRIDGE_SENSOR_VEHICLE_NAVIGATION_STATE_s dbc_mia_replacement_BRIDGE_SENSOR_VEHICLE_NAVIGATION_STATE;
+
+const uint32_t dbc_mia_threshold_MOTOR_HEARTBEAT = 300;
+const dbc_MOTOR_HEARTBEAT_s dbc_mia_replacement_MOTOR_HEARTBEAT;
+
+const uint32_t dbc_mia_threshold_GEO_HEARTBEAT = 300;
+const dbc_BRIDGE_SENSOR_HEARTBEAT_s dbc_mia_replacement_BRIDGE_SENSOR_HEARTBEAT;
+
+const uint32_t dbc_mia_threshold_BRIDGE_SENSOR_HEARTBEAT = 300;
+const dbc_GEO_HEARTBEAT_s dbc_mia_replacement_GEO_HEARTBEAT;
+
+const uint32_t dbc_mia_threshold_MOTOR_ACTUAL_SPEED = 300;
+const dbc_MOTOR_ACTUAL_SPEED_s dbc_mia_replacement_MOTOR_ACTUAL_SPEED;
