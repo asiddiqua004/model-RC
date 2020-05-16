@@ -3,15 +3,15 @@
 #include "external_lcd.h"
 #include "tesla_model_rc.h"
 
-#define OBSTACLE_VERY_VERY_NEAR 4U
-#define OBSTACLE_VERY_NEAR 12U // 55U
-#define OBSTACLE_NEAR 24U      // 65U //
-#define OBSTACLE_MID 30U       // 100U //
+#define OBSTACLE_VERY_VERY_NEAR 8U
+#define OBSTACLE_VERY_NEAR 20U // 55U
+#define OBSTACLE_NEAR 30U      // 65U //
+#define OBSTACLE_MID 40U       // 100U //
 #define OBSTACLE_FAR 70U       // 160U //
 
 #define MOTOR_VERY_SLOW_KPH 5.70
 #define MOTOR_SLOW_KPH 5.80
-#define MOTOR_MED_KPH 5.90
+#define MOTOR_MED_KPH 5.95
 #define MOTOR_FAST_KPH 6.00
 #define MOTOR_STOP_KPH 5.00
 // #define  MOTOR_TEST_KPH   0.00f

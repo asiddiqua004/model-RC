@@ -40,6 +40,7 @@ static navigation_status_e navigation_status = NO_NAV;
 static float navigation_steering = 0.0f;
 static int8_t geo_distance = 5;
 static bool motor_test_flag = false;
+static float previous_battery_voltage;
 // static gpio_s motor_test_switch;
 /****************PRIVATE FUNCTIONS ****************/
 
@@ -191,9 +192,9 @@ static void determine_navigation_status(void) {
 }
 
 static bool determine_battery_status_high(void) {
-  bool battery_status = false;
-  if (driver_battery_voltage > 5.0f) {
-    battery_status = true;
+  bool battery_status = true;
+  if (driver_battery_voltage < 5.0f && previous_battery_voltage < 5.0f) {
+    battery_status = false;
   }
   return battery_status;
 }
@@ -400,6 +401,7 @@ void driver__process_navigation_state(dbc_BRIDGE_SENSOR_VEHICLE_NAVIGATION_STATE
   }
 }
 void driver__process_battery_voltage(dbc_BRIDGE_SENSOR_VOLTAGE_s battery_voltage) {
+  previous_battery_voltage = driver_battery_voltage;
   driver_battery_voltage = battery_voltage.BRIDGE_SENSOR_VOLTAGE;
   set_lcd_battery_voltage(driver_battery_voltage);
 }
