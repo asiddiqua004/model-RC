@@ -464,6 +464,10 @@ class CodeWriter(object):
             maximum = (
                 str(signal.maximum) + "f" if signal_is_float else str(signal.maximum)
             )
+<<<<<<< site_scons/site_tools/codegen/code_writer.py
+            minimum = re.sub(r"(?<!\.)0f$", "0.0f", minimum)
+            maximum = re.sub(r"(?<!\.)0f$", "0.0f", maximum)
+=======
             minimum = re.sub(r'(?<!\.)0f$', '0.0f', minimum)
             maximum = re.sub(r'(?<!\.)0f$', '0.0f', maximum)
 >>>>>>> site_scons/site_tools/codegen/code_writer.py
