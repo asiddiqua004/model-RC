@@ -4,27 +4,6 @@
 #include "driver.h"
 #include "gpio.h"
 
-static const int8_t OBSTACLE_VERY_VERY_NEAR = 4U;
-static const int8_t OBSTACLE_VERY_NEAR = 12U; // 55U;
-static const int8_t OBSTACLE_NEAR = 24U;      // 65U; //
-static const int8_t OBSTACLE_MID = 30U;       // 100U; //
-static const int8_t OBSTACLE_FAR = 80U;       // 160U; //
-
-static const float MOTOR_VERY_SLOW_KPH = 5.20f;
-static const float MOTOR_SLOW_KPH = 5.30f;
-static const float MOTOR_MED_KPH = 5.40f;
-static const float MOTOR_FAST_KPH = 5.50f;
-static const float MOTOR_STOP_KPH = 5.00f;
-static const float MOTOR_TEST_KPH = 0.00f;
-// static const float MOTOR_REV_SLOW_KPH 0.40
-static const float MOTOR_REV_MED_KPH = 4.50f; //-0.50
-
-static const float STEER_LEFT = 0.0f;       //-2.0
-static const float STEER_SOFT_LEFT = 1.0f;  //-1.0
-static const float STEER_RIGHT = 4.0f;      // 2.0
-static const float STEER_SOFT_RIGHT = 3.0f; // 3.0
-static const float STEER_STRAIGHT = 2.0f;   // 0.0
-
 /****************PRIVATE VARIABLES ****************/
 
 static node_alive_s driver_node = {
@@ -61,7 +40,7 @@ static navigation_status_e navigation_status = NO_NAV;
 static float navigation_steering = 0.0f;
 static int8_t geo_distance = 5;
 static bool motor_test_flag = false;
-static gpio_s motor_test_switch;
+// static gpio_s motor_test_switch;
 /****************PRIVATE FUNCTIONS ****************/
 
 // Reference:
@@ -219,49 +198,48 @@ static bool determine_battery_status_high(void) {
   return battery_status;
 }
 
-static bool start_motor_test(void) {
-  bool start_motor_status = false;
-  if (motor_test_flag == false && gpio__get(motor_test_switch)) {
-    start_motor_status = true;
-  }
-  return start_motor_status;
-}
+// static bool start_motor_test(void) {
+//   bool start_motor_status = false;
+//   if (motor_test_flag == false && gpio__get(motor_test_switch)) {
+//     start_motor_status = true;
+//   }
+//   return start_motor_status;
+// }
 
-static bool stop_motor_test(void) {
-  bool stop_motor_status = false;
-  if (motor_test_flag == true && gpio__get(motor_test_switch)) {
-    stop_motor_status = true;
-  }
-  return stop_motor_status;
-}
+// static bool stop_motor_test(void) {
+//   bool stop_motor_status = false;
+//   if (motor_test_flag == true && gpio__get(motor_test_switch)) {
+//     stop_motor_status = true;
+//   }
+//   return stop_motor_status;
+// }
 
 static void compute__motor_commands(void) {
   switch (state_machine_state) {
   case INIT:
-    motor_test_switch = gpio__construct_as_input(GPIO__PORT_0, 15);
+    // motor_test_switch = gpio__construct_as_input(GPIO__PORT_0, 15);
     set_motor_status(MOTOR_STOP_KPH, STEER_STRAIGHT);
     state_machine_state = WAIT;
     set_lcd_driver_state("INIT");
     break;
 
   case WAIT:
-    if (stop_motor_test()) {
-      motor_test_flag = false;
-      state_machine_state = WAIT;
-      set_lcd_driver_state("WAIT");
-      set_motor_status(MOTOR_STOP_KPH, STEER_STRAIGHT);
-      return;
-    }
-    if (start_motor_test()) {
-      state_machine_state = WAIT;
-      set_lcd_driver_state("TEST");
-      motor_test_flag = true;
-      set_motor_status(MOTOR_TEST_KPH, STEER_STRAIGHT);
-      return;
-    }
+    // if (stop_motor_test()) {
+    //   motor_test_flag = false;
+    //   state_machine_state = WAIT;
+    //   set_lcd_driver_state("WAIT");
+    //   set_motor_status(MOTOR_STOP_KPH, STEER_STRAIGHT);
+    //   return;
+    // }
+    // if (start_motor_test()) {
+    //   state_machine_state = WAIT;
+    //   set_lcd_driver_state("TEST");
+    //   motor_test_flag = true;
+    //   set_motor_status(MOTOR_TEST_KPH, STEER_STRAIGHT);
+    //   return;
+    // }
     set_motor_status(MOTOR_STOP_KPH, STEER_STRAIGHT);
-    if (0 != driver_navigation_state && all_nodes_alive() && determine_battery_status_high() &&
-        motor_test_flag == false) {
+    if (0 != driver_navigation_state && all_nodes_alive() && determine_battery_status_high()) {
       state_machine_state = OBSTACLE;
       set_lcd_driver_state("WAIT");
     } else if (!determine_battery_status_high()) {
@@ -284,7 +262,7 @@ static void compute__motor_commands(void) {
       set_motor_status(MOTOR_STOP_KPH, STEER_STRAIGHT);
       break;
     case STRAIGHT_MOVEMENT:
-      state_machine_state = NAVIGATE;
+      // state_machine_state = NAVIGATE;
       set_lcd_driver_state("OB-STR");
       set_motor_status(MOTOR_MED_KPH, STEER_STRAIGHT);
       break;
