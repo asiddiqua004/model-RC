@@ -60,16 +60,27 @@ void reset_counter(void) {
   motor_hbt.mia_info.mia_counter = 0;
   bridge_sensor_hbt.mia_info.mia_counter = 0;
   geo_hbt.mia_info.mia_counter = 0;
+  motor_actual_speed.mia_info.mia_counter = 0;
 }
 
 void test_can_handler__manage_mia_10hz__above_mia_threshold(void) {
   gpio_s led = {0};
 
   sensor_data.mia_info.mia_counter = 200;
+  board_io__get_led0_ExpectAndReturn(led);
+  gpio__reset_Expect(led);
   can_handler__manage_mia_10hz();
   reset_counter();
 
   geo_gps_data.mia_info.mia_counter = 200;
+  board_io__get_led1_ExpectAndReturn(led);
+  gpio__reset_Expect(led);
+  can_handler__manage_mia_10hz();
+  reset_counter();
+
+  motor_actual_speed.mia_info.mia_counter = 200;
+  board_io__get_led2_ExpectAndReturn(led);
+  gpio__reset_Expect(led);
   can_handler__manage_mia_10hz();
   reset_counter();
 
@@ -79,23 +90,23 @@ void test_can_handler__manage_mia_10hz__above_mia_threshold(void) {
   can_handler__manage_mia_10hz();
   reset_counter();
 
-  motor_hbt.mia_info.mia_counter = 200;
-  board_io__get_led0_ExpectAndReturn(led);
-  gpio__reset_Expect(led);
-  can_handler__manage_mia_10hz();
-  reset_counter();
+  //   motor_hbt.mia_info.mia_counter = 200;
+  //   board_io__get_led0_ExpectAndReturn(led);
+  //   gpio__reset_Expect(led);
+  //   can_handler__manage_mia_10hz();
+  //   reset_counter();
 
-  bridge_sensor_hbt.mia_info.mia_counter = 200;
-  board_io__get_led1_ExpectAndReturn(led);
-  gpio__reset_Expect(led);
-  can_handler__manage_mia_10hz();
-  reset_counter();
+  //   bridge_sensor_hbt.mia_info.mia_counter = 200;
+  //   board_io__get_led1_ExpectAndReturn(led);
+  //   gpio__reset_Expect(led);
+  //   can_handler__manage_mia_10hz();
+  //   reset_counter();
 
-  geo_hbt.mia_info.mia_counter = 200;
-  board_io__get_led2_ExpectAndReturn(led);
-  gpio__reset_Expect(led);
-  can_handler__manage_mia_10hz();
-  reset_counter();
+  //   geo_hbt.mia_info.mia_counter = 200;
+  //   board_io__get_led2_ExpectAndReturn(led);
+  //   gpio__reset_Expect(led);
+  //   can_handler__manage_mia_10hz();
+  //   reset_counter();
 }
 
 void test_can_handler__handle_all_incoming_messages__unhandled_msg(void) {
@@ -106,6 +117,7 @@ void test_can_handler__handle_all_incoming_messages__unhandled_msg(void) {
 
 void test_can_handler__handle_all_incoming_messages__handled_msg(void) {
   gpio_s gpio = {};
+  gpio_s led = {0};
   can__msg_t can_msg_rx = {0};
 
   can_msg_rx.msg_id = 417U;
@@ -125,6 +137,8 @@ void test_can_handler__handle_all_incoming_messages__handled_msg(void) {
   can__rx_ReturnThruPtr_can_message_ptr(&can_msg_rx);
   can__rx_ExpectAndReturn(can1, NULL, 0, false);
   can__rx_IgnoreArg_can_message_ptr();
+  board_io__get_led0_ExpectAndReturn(led);
+  gpio__set_Expect(led);
   can_handler__handle_all_incoming_messages_10Hz();
   reset_counter();
 
@@ -135,6 +149,8 @@ void test_can_handler__handle_all_incoming_messages__handled_msg(void) {
   can__rx_ReturnThruPtr_can_message_ptr(&can_msg_rx);
   can__rx_ExpectAndReturn(can1, NULL, 0, false);
   can__rx_IgnoreArg_can_message_ptr();
+  board_io__get_led1_ExpectAndReturn(led);
+  gpio__set_Expect(led);
   can_handler__handle_all_incoming_messages_10Hz();
   reset_counter();
 }

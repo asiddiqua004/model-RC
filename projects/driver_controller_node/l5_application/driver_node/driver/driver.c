@@ -1,6 +1,32 @@
+#include <float.h>
+#include <math.h>
+
 #include "driver.h"
+#include "gpio.h"
+
+static const int8_t OBSTACLE_VERY_VERY_NEAR = 4U;
+static const int8_t OBSTACLE_VERY_NEAR = 12U; // 55U;
+static const int8_t OBSTACLE_NEAR = 24U;      // 65U; //
+static const int8_t OBSTACLE_MID = 30U;       // 100U; //
+static const int8_t OBSTACLE_FAR = 80U;       // 160U; //
+
+static const float MOTOR_VERY_SLOW_KPH = 5.20f;
+static const float MOTOR_SLOW_KPH = 5.30f;
+static const float MOTOR_MED_KPH = 5.40f;
+static const float MOTOR_FAST_KPH = 5.50f;
+static const float MOTOR_STOP_KPH = 5.00f;
+static const float MOTOR_TEST_KPH = 0.00f;
+// static const float MOTOR_REV_SLOW_KPH 0.40
+static const float MOTOR_REV_MED_KPH = 4.50f; //-0.50
+
+static const float STEER_LEFT = 0.0f;       //-2.0
+static const float STEER_SOFT_LEFT = 1.0f;  //-1.0
+static const float STEER_RIGHT = 4.0f;      // 2.0
+static const float STEER_SOFT_RIGHT = 3.0f; // 3.0
+static const float STEER_STRAIGHT = 2.0f;   // 0.0
 
 /****************PRIVATE VARIABLES ****************/
+
 static node_alive_s driver_node = {
     .motor = 0,
     .bridge_sensor = 0,
@@ -22,7 +48,7 @@ static geo_s driver_geo = {
     .destination_heading = 0.0f,
 };
 
-static uint8_t driver_navigation_state = 1;
+static uint8_t driver_navigation_state = 0;
 static float driver_battery_voltage = 0.0f;
 
 static dbc_DRIVER_MOTOR_CONTROL_s motor_commands = {0};
@@ -34,8 +60,19 @@ static obstacle_status_e obstacle_status = NO_MOVEMENT; // 0
 static navigation_status_e navigation_status = NO_NAV;
 static float navigation_steering = 0.0f;
 static int8_t geo_distance = 5;
-
+static bool motor_test_flag = false;
+static gpio_s motor_test_switch;
 /****************PRIVATE FUNCTIONS ****************/
+
+// Reference:
+// https://www.tutorialspoint.com/what-is-the-most-effective-way-for-float-and-double-comparison-in-c-cplusplus
+
+static bool checkpoint__private_compare_float(float x, float y) {
+  float epsilon = 0.01f;
+  if ((float)fabs(x - y) < epsilon)
+    return true; // they are same
+  return false;  // they are not same
+}
 
 static void set_motor_status(float speed, float steer) {
   motor_commands.DRIVER_MOTOR_CONTROL_SPEED_KPH = driver_motor.speed = speed;
@@ -66,6 +103,7 @@ Nav   LEFT	MIDDLE RIGHT  BACK    	Decision         Number
 1    1	      1	     1  	 1        OB-STOP             31
 */
 static void determine_obstacle_status(void) {
+  // previous_obstacle_status = obstacle_status;
   if (0 == driver_navigation_state) {
     obstacle_status = 0;
     return;
@@ -73,7 +111,7 @@ static void determine_obstacle_status(void) {
     obstacle_status |= (1 << 4);
   }
   if (driver_sensor.left <= OBSTACLE_NEAR || driver_sensor.left <= OBSTACLE_MID) {
-    if (driver_sensor.left <= OBSTACLE_VERY_NEAR - 2) {
+    if (driver_sensor.left <= OBSTACLE_VERY_VERY_NEAR) {
       // do nothing
     } else {
       obstacle_status |= (1 << 3);
@@ -82,7 +120,7 @@ static void determine_obstacle_status(void) {
     obstacle_status &= ~(1 << 3);
   }
   if (driver_sensor.right <= OBSTACLE_NEAR || driver_sensor.right <= OBSTACLE_MID) {
-    if (driver_sensor.right <= OBSTACLE_VERY_NEAR - 2) {
+    if (driver_sensor.right <= OBSTACLE_VERY_VERY_NEAR) {
       // do nothing
     } else {
       obstacle_status |= (1 << 1);
@@ -91,7 +129,7 @@ static void determine_obstacle_status(void) {
     obstacle_status &= ~(1 << 1);
   }
   if (driver_sensor.front <= OBSTACLE_NEAR || driver_sensor.front <= OBSTACLE_MID) {
-    if (driver_sensor.front <= OBSTACLE_VERY_NEAR - 2) {
+    if (driver_sensor.front <= OBSTACLE_VERY_VERY_NEAR) {
       // do nothing
     } else {
       obstacle_status |= (1 << 2);
@@ -103,7 +141,7 @@ static void determine_obstacle_status(void) {
     obstacle_status &= ~(1 << 0);
   } else if (obstacle_status == 30) {
     if (driver_sensor.back <= OBSTACLE_NEAR || driver_sensor.back <= OBSTACLE_MID) {
-      if (driver_sensor.back <= OBSTACLE_VERY_NEAR - 2) {
+      if (driver_sensor.back <= OBSTACLE_VERY_VERY_NEAR) {
         // do nothing
       } else {
         obstacle_status |= (1 << 0);
@@ -113,55 +151,53 @@ static void determine_obstacle_status(void) {
     }
   }
 }
-
 /* navigation_status
  (distance>10)
-Nav Destination        Current	 	 Decision             Number //N L S R
-0      x	               x	       	NAV-NM               0   //No navigation
-1      x	     ==        x	     	  NAV-STR              10   //1 0 1 0
-1      x	     <         x	       	NAV-RM               9   //1 0 0 1
-1      x	     >         x	       	NAV-LM               12  //1 1 0 0
+Nav Destination        Current	 	 Decision             Number     //N L S R
+0      x	               x	       	NAV-NM               0         //No navigation
+1      x	     ==        x	     	  NAV-STR              10        //1 0 1 0
+1      x	     <         x	       	NAV-RM               9         //1 0 0 1
+1      x	     >         x	       	NAV-LM               12        //1 1 0 0
  (distance<10)
-0      x	               x	       	NAV-NM               0   //No navigation
-1      x	     ==        x	     	  NAV-STR              10   //1 0 0 0
-1      x	     <         x	       	NAV-RM               9   //1 0 0 1
-1      x	     >         x	       	NAV-LM               12  //1 1 0 0
- (distance<2)
+0      x	               x	       	NAV-NM               0         //No navigation
+1      x	     ==        x	     	  NAV-STR              10        //1 0 0 0
+1      x	     <         x	       	NAV-RM               9         //1 0 0 1
+1      x	     >         x	       	NAV-LM               12        //1 1 0 0
+ (distance<1)
 1      x	               x	       	NAV-STP              0
 */
 // TODO: implement proper steering values.
 void get_navigation_steering(void) {
-  float turning_angle = driver_geo.destination_heading - driver_geo.current_heading;
+  if (checkpoint__private_compare_float(driver_geo.destination_heading, 0.0)) {
+    navigation_steering = 2.0;
+    navigation_status = STRAIGHT_NAV;
+    return;
+  }
+  float turning_angle = (driver_geo.destination_heading - driver_geo.current_heading);
   if (turning_angle > 180.0) {
     turning_angle -= 360.0;
   } else if (turning_angle < -180.0) {
     turning_angle += 360.0;
   }
-
   turning_angle = (turning_angle > 45.0) ? 45.0 : turning_angle;
   turning_angle = (turning_angle < -45.0) ? -45.0 : turning_angle;
-
   // navigation_steering = (2 * turning_angle) / 45;
-
   navigation_steering = (2.0 * (turning_angle / 45)) + 2.0;
 }
 
 static void get_navigation_direction(void) {
-  if (driver_geo.destination_heading == driver_geo.current_heading) {
+  if (checkpoint__private_compare_float(driver_geo.destination_heading, driver_geo.current_heading)) {
     navigation_status &= ~(7 << 0);
-    get_navigation_steering();
-    // navigation_steering = 0.0f;
     navigation_status |= (1 << 1);
+    get_navigation_steering(); // navigation_steering = 0.0f;
   } else if (driver_geo.destination_heading > driver_geo.current_heading) {
     navigation_status &= ~(7 << 0);
-    get_navigation_steering();
-    // navigation_steering = -2.0f;
     navigation_status |= (1 << 2);
+    get_navigation_steering(); // navigation_steering = -2.0f;
   } else if (driver_geo.destination_heading < driver_geo.current_heading) {
     navigation_status &= ~(7 << 0);
-    get_navigation_steering();
-    // navigation_steering = 2.0f;
     navigation_status |= (1 << 0);
+    get_navigation_steering(); // navigation_steering = 2.0f;
   }
 }
 
@@ -175,24 +211,72 @@ static void determine_navigation_status(void) {
   get_navigation_direction();
 }
 
-static void compute__motor_commands(void) {
+static bool determine_battery_status_high(void) {
+  bool battery_status = false;
+  if (driver_battery_voltage > 5.0f) {
+    battery_status = true;
+  }
+  return battery_status;
+}
 
+static bool start_motor_test(void) {
+  bool start_motor_status = false;
+  if (motor_test_flag == false && gpio__get(motor_test_switch)) {
+    start_motor_status = true;
+  }
+  return start_motor_status;
+}
+
+static bool stop_motor_test(void) {
+  bool stop_motor_status = false;
+  if (motor_test_flag == true && gpio__get(motor_test_switch)) {
+    stop_motor_status = true;
+  }
+  return stop_motor_status;
+}
+
+static void compute__motor_commands(void) {
   switch (state_machine_state) {
   case INIT:
+    motor_test_switch = gpio__construct_as_input(GPIO__PORT_0, 15);
     set_motor_status(MOTOR_STOP_KPH, STEER_STRAIGHT);
     state_machine_state = WAIT;
     set_lcd_driver_state("INIT");
     break;
+
   case WAIT:
+    if (stop_motor_test()) {
+      motor_test_flag = false;
+      state_machine_state = WAIT;
+      set_lcd_driver_state("WAIT");
+      set_motor_status(MOTOR_STOP_KPH, STEER_STRAIGHT);
+      return;
+    }
+    if (start_motor_test()) {
+      state_machine_state = WAIT;
+      set_lcd_driver_state("TEST");
+      motor_test_flag = true;
+      set_motor_status(MOTOR_TEST_KPH, STEER_STRAIGHT);
+      return;
+    }
     set_motor_status(MOTOR_STOP_KPH, STEER_STRAIGHT);
-    if (0 != driver_navigation_state && all_nodes_alive()) {
+    if (0 != driver_navigation_state && all_nodes_alive() && determine_battery_status_high() &&
+        motor_test_flag == false) {
       state_machine_state = OBSTACLE;
+      set_lcd_driver_state("WAIT");
+    } else if (!determine_battery_status_high()) {
+      state_machine_state = WAIT;
+      set_lcd_driver_state("PWRDWN");
     } else {
       state_machine_state = WAIT;
+      set_lcd_driver_state("WAIT");
     }
-    set_lcd_driver_state("WAIT");
     break;
+
   case OBSTACLE:
+    if (!determine_battery_status_high()) {
+      state_machine_state = WAIT;
+    }
     determine_obstacle_status();
     switch (obstacle_status) {
     case NO_MOVEMENT:
@@ -234,7 +318,7 @@ static void compute__motor_commands(void) {
       break;
     case REVERSE_MOVEMENT:
       set_lcd_driver_state("OB-REV");
-      set_motor_status(MOTOR_REV_MED_KPH, STEER_STRAIGHT);
+      set_motor_status(MOTOR_REV_MED_KPH, STEER_SOFT_RIGHT);
       break;
     case STOP:
       set_lcd_driver_state("OB-STP");
@@ -248,6 +332,9 @@ static void compute__motor_commands(void) {
     break;
 
   case NAVIGATE:
+    if (!determine_battery_status_high()) {
+      state_machine_state = WAIT;
+    }
     determine_navigation_status();
     determine_obstacle_status();
     if (obstacle_status == STRAIGHT_MOVEMENT) {
@@ -327,7 +414,12 @@ void driver__process_geo_controller_directions(dbc_GEO_GPS_COMPASS_HEADINGS_s in
 }
 // TODO implement navigation functionality
 void driver__process_navigation_state(dbc_BRIDGE_SENSOR_VEHICLE_NAVIGATION_STATE_s navigation_state) {
-  // driver_navigation_state = navigation_state.BRIDGE_SENSOR_VEHICLE_NAVIGATION_STATE;
+  driver_navigation_state = navigation_state.BRIDGE_SENSOR_VEHICLE_NAVIGATION_STATE;
+  if (driver_navigation_state == 1) {
+    driver_navigation_state = 0;
+  } else {
+    driver_navigation_state = 1;
+  }
 }
 void driver__process_battery_voltage(dbc_BRIDGE_SENSOR_VOLTAGE_s battery_voltage) {
   driver_battery_voltage = battery_voltage.BRIDGE_SENSOR_VOLTAGE;
