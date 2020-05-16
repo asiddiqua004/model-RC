@@ -1,7 +1,0 @@
-#pragma once
-
-#include "tesla_model_rc.h"
-
-void driver__process_sensor_input(dbc_SENSOR_SONARS_s incoming_sensor_data);
-void driver__process_geo_controller_directions(dbc_GEO_GPS_HEADINGS_s incoming_geo_heading);
-dbc_DRIVER_MOTOR_CONTROL_s driver__get_motor_commands(void);
