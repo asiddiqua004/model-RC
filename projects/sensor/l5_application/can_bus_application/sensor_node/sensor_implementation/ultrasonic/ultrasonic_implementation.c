@@ -9,7 +9,7 @@
 
 static ultrasonic_s front_ultrasonic, back_ultrasonic, left_ultrasonic, right_ultrasonic;
 static avg_buffer_s front_avg_buffer, back_avg_buffer, left_avg_buffer, right_avg_buffer;
-#define AVG_BUFFER_CAPACITY 5U
+#define AVG_BUFFER_CAPACITY 10U
 
 static void front_ultrasonic_echo_falling_edge_interrupt_handler(void) {
   front_ultrasonic.time_of_flight_us = sys_time__get_uptime_us() - front_ultrasonic.last_trigger_time_us;
