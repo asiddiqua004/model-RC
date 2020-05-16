@@ -468,7 +468,10 @@ class CodeWriter(object):
             minimum = re.sub(r'(?<!\.)0f$', '0.0f', minimum)
             maximum = re.sub(r'(?<!\.)0f$', '0.0f', maximum)
 
+<<<<<<< HEAD
 >>>>>>> latest accumulated changes to the driver_node
+=======
+>>>>>>> creating new branch for driver_node
 
             raw_sig_code = "  {0} = ((uint64_t)(((MAX_OF(MIN_OF({1}message->{2},{3}),{4}) - ({5})) / {6}f) + 0.5f))".format(
                 raw_sig_name,
