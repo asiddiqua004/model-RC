@@ -74,7 +74,7 @@ void wifi_implementation__handle_line(void) {
 
 void wifi_implementation__send_line(const uint8_t front_radar, const uint8_t left_radar, const uint8_t right_radar,
                                     const uint8_t back_radar) {
-  uart_printf(wifi_uart, "^%02d,%02d,%02d,%02d", front_radar > 100 ? 99 : front_radar,
-              left_radar > 100 ? 99 : left_radar, right_radar > 100 ? 99 : right_radar,
-              back_radar > 100 ? 99 : back_radar);
+  uart_printf(wifi_uart, "^%02d,%02d,%02d,%02d", front_radar > 99 ? 99 : front_radar,
+              left_radar > 99 ? 99 : left_radar, right_radar > 99 ? 99 : right_radar,
+              back_radar > 99 ? 99 : back_radar);
 }
