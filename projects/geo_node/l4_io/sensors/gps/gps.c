@@ -14,6 +14,7 @@
 #include "uart_printf.h"
 
 #include "inttypes.h"
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -68,6 +69,23 @@ static bool gps__private_verify_nmea_checksum(const char *gps_line, size_t line_
   return checksum_match;
 }
 
+static gps_coordinates_t gps__private_convert_from_dms_to_decimal_degrees(float latitude, float longitude) {
+  const float latitude_dms_degrees = (float)trunc((latitude / 100.0f));
+  const float latitude_dms_minutes = fmodf(latitude, 100.0f);
+
+  const float longitude_dms_degrees = (float)trunc((longitude / 100.0f));
+  const float longitude_dms_minutes = fmodf(longitude, 100.0f);
+
+  const float latitude_decimal_degrees = latitude_dms_degrees + (latitude_dms_minutes / 60.0f);
+  const float longitude_decimal_degrees = longitude_dms_degrees + (longitude_dms_minutes / 60.0f);
+
+  const gps_coordinates_t converted_coordinates = {
+      .latitude = latitude_decimal_degrees,
+      .longitude = longitude_decimal_degrees,
+  };
+  return converted_coordinates;
+}
+
 static void gps__private_handle_line(void) {
   char gps_line[300U] = {0U};
   const char *const delimiter = ",";
@@ -76,6 +94,8 @@ static void gps__private_handle_line(void) {
 
     char latitude_direction = '\0';
     char longitude_direction = '\0';
+    float latitude = 0.0f;
+    float longitude = 0.0f;
     const char *token = strtok(gps_line, delimiter);
     bool valid_string = (NULL != token);
 
@@ -85,7 +105,7 @@ static void gps__private_handle_line(void) {
     if (valid_string)
       valid_string &= (NULL != (token = strtok(NULL, delimiter)));
     if (valid_string)
-      valid_string &= (0U != sscanf(token, "%f", &parsed_coordinates.latitude));
+      valid_string &= (0U != sscanf(token, "%f", &latitude));
 
     // Skip to Latitude Direction and Store Character
     if (valid_string)
@@ -97,7 +117,7 @@ static void gps__private_handle_line(void) {
     if (valid_string)
       valid_string &= (NULL != (token = strtok(NULL, delimiter)));
     if (valid_string)
-      valid_string &= (0U != sscanf(token, "%f", &parsed_coordinates.longitude));
+      valid_string &= (0U != sscanf(token, "%f", &longitude));
 
     // Skip to Longitude Direction and Store Character
     if (valid_string)
@@ -114,22 +134,26 @@ static void gps__private_handle_line(void) {
     // Handle South and West Directions
     if (valid_string) {
       if ('S' == latitude_direction) {
-        parsed_coordinates.latitude = -parsed_coordinates.latitude;
+        latitude = -latitude;
       }
       if ('W' == longitude_direction) {
-        parsed_coordinates.longitude = -parsed_coordinates.longitude;
+        longitude = -longitude;
       }
+      const gps_coordinates_t converted_coordinates =
+          gps__private_convert_from_dms_to_decimal_degrees(latitude, longitude);
+      parsed_coordinates.latitude = converted_coordinates.latitude;
+      parsed_coordinates.longitude = converted_coordinates.longitude;
     }
   }
-  // if (false == line_buffer__remove_line(&line, gps_line, sizeof(gps_line))) {
-  //   // Fix quality is set to 0 in the case the GPS is disconnected
-  //   fix_quality = 0;
-  //   // is_gps_configured = false;
-  //   is_gps_disconnected = true;
-  // } else {
-  //   is_gps_disconnected = false;
-  // }
 }
+// if (false == line_buffer__remove_line(&line, gps_line, sizeof(gps_line))) {
+//   // Fix quality is set to 0 in the case the GPS is disconnected
+//   fix_quality = 0;
+//   // is_gps_configured = false;
+//   is_gps_disconnected = true;
+// } else {
+//   is_gps_disconnected = false;
+// }
 
 static void gps__private_configure_for_nmea_gngga(void) {
 
