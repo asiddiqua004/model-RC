@@ -4,10 +4,12 @@
 #include "tesla_model_rc.h"
 
 #define OBSTACLE_VERY_VERY_NEAR 8U
+#define OBSTACLE_NO_TURN_DISTANCE 12U
 #define OBSTACLE_VERY_NEAR 20U // 55U
 #define OBSTACLE_NEAR 30U      // 65U //
 #define OBSTACLE_MID 40U       // 100U //
-#define OBSTACLE_FAR 70U       // 160U //
+#define OBSTACLE_MID_FAR 50U
+#define OBSTACLE_FAR 70U // 160U //
 
 #define MOTOR_VERY_SLOW_KPH 5.70
 #define MOTOR_SLOW_KPH 5.80

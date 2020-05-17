@@ -41,6 +41,8 @@ static float navigation_steering = 0.0f;
 static int8_t geo_distance = 5;
 static bool motor_test_flag = false;
 static float previous_battery_voltage;
+static int8_t reverse_count = 0;
+static int8_t post_reverse_count = 0;
 // static gpio_s motor_test_switch;
 /****************PRIVATE FUNCTIONS ****************/
 
@@ -117,9 +119,9 @@ static void determine_obstacle_status(void) {
   } else if (driver_sensor.front > OBSTACLE_MID) {
     obstacle_status &= ~(1 << 2);
   }
-  if (obstacle_status < 30) {
+  if (obstacle_status != 30 && obstacle_status != 28 && obstacle_status != 22 && obstacle_status != 26) {
     obstacle_status &= ~(1 << 0);
-  } else if (obstacle_status == 30) {
+  } else if (obstacle_status == 30 || obstacle_status == 28 || obstacle_status == 22 || obstacle_status == 26) {
     if (driver_sensor.back <= OBSTACLE_NEAR || driver_sensor.back <= OBSTACLE_MID) {
       if (driver_sensor.back <= OBSTACLE_VERY_VERY_NEAR) {
         // do nothing
@@ -127,7 +129,18 @@ static void determine_obstacle_status(void) {
         obstacle_status |= (1 << 0);
       }
     } else if (driver_sensor.back > OBSTACLE_MID) {
-      obstacle_status &= ~(1 << 0);
+      if (obstacle_status == 28 &&
+          (driver_sensor.left < OBSTACLE_NO_TURN_DISTANCE || driver_sensor.front < OBSTACLE_NO_TURN_DISTANCE)) { // HRM
+        obstacle_status &= ~(1 << 0);
+      } else if (obstacle_status == 22 &&
+                 (driver_sensor.right < OBSTACLE_NO_TURN_DISTANCE || driver_sensor.front < OBSTACLE_NO_TURN_DISTANCE)) {
+        obstacle_status &= ~(1 << 0);
+      } else if (obstacle_status == 26 &&
+                 (driver_sensor.right < OBSTACLE_NO_TURN_DISTANCE || driver_sensor.left < OBSTACLE_NO_TURN_DISTANCE)) {
+        obstacle_status &= ~(1 << 0);
+      } else if (obstacle_status == 30) {
+        obstacle_status &= ~(1 << 0);
+      }
     }
   }
 }
@@ -256,14 +269,16 @@ static void compute__motor_commands(void) {
     if (!determine_battery_status_high()) {
       state_machine_state = WAIT;
     }
-    determine_obstacle_status();
+    if (reverse_count == 0) {
+      determine_obstacle_status();
+    }
     switch (obstacle_status) {
     case NO_MOVEMENT:
       set_lcd_driver_state("OB-NM");
       set_motor_status(MOTOR_STOP_KPH, STEER_STRAIGHT);
       break;
     case STRAIGHT_MOVEMENT:
-      // state_machine_state = NAVIGATE;
+      state_machine_state = NAVIGATE;
       set_lcd_driver_state("OB-STR");
       set_motor_status(MOTOR_MED_KPH, STEER_STRAIGHT);
       break;
@@ -296,8 +311,23 @@ static void compute__motor_commands(void) {
       set_motor_status(MOTOR_SLOW_KPH, STEER_RIGHT);
       break;
     case REVERSE_MOVEMENT:
-      set_lcd_driver_state("OB-REV");
-      set_motor_status(MOTOR_REV_MED_KPH, STEER_SOFT_RIGHT);
+      reverse_count++;
+      if (reverse_count <= 8) {
+        set_lcd_driver_state("OB-STP");
+        set_motor_status(MOTOR_STOP_KPH, STEER_STRAIGHT);
+      } else if (reverse_count > 8 && post_reverse_count < 40) {
+        post_reverse_count++;
+        if (driver_sensor.back < OBSTACLE_MID) {
+          reverse_count = 0;
+          post_reverse_count = 0;
+          obstacle_status = 31;
+        }
+        set_lcd_driver_state("OB-REV");
+        set_motor_status(MOTOR_REV_MED_KPH, STEER_RIGHT);
+      } else if (post_reverse_count == 40 && reverse_count > 8) {
+        reverse_count = 0;
+        post_reverse_count = 0;
+      }
       break;
     case STOP:
       set_lcd_driver_state("OB-STP");
