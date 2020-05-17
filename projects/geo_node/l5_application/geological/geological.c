@@ -51,7 +51,14 @@ static float geological__private_compute_heading_degree(void) {
 
   // targetHeading = fmodf(to_degree(atan2(x,y)) + 360, 360)
   // const float adjusted_heading = beta_degrees - compass_heading;
-
+  const dbc_GEO_GPS_COMPASS_DBG_2_s message = {.GEO_GPS_HEADINGS_LATITUDE_INT = destination_coordinates.latitude,
+                                               .GEO_GPS_HEADINGS_LONGITUDE_INT = destination_coordinates.longitude};
+  dbc_encode_and_send_GEO_GPS_COMPASS_DBG_2(NULL, &message);
+  const dbc_GEO_GPS_COMPASS_DBG_3_s message1 = {.GEO_GPS_CURRENT_LATITUDE_INT = current_coordinates.latitude,
+                                                .GEO_GPS_CURRENT_LONGITUDE_INT = current_coordinates.longitude};
+  dbc_encode_and_send_GEO_GPS_COMPASS_DBG_3(NULL, &message1);
+  const dbc_GEO_GPS_COMPASS_DBG_s message2 = {.GEO_GPS_BETA = beta_degrees};
+  dbc_encode_and_send_GEO_GPS_COMPASS_DBG(NULL, &message2);
   return beta_degrees;
 }
 
@@ -91,14 +98,18 @@ void geological__run_once(void) {
 }
 
 void geological__update_destination_coordinates(dbc_BRIDGE_SENSOR_GPS_HEADINGS_s *new_coordinates) {
+  const dbc_GEO_GPS_COMPASS_DBG_4_s message = {
+      .GEO_GPS_RECEIVED_LATITUDE = new_coordinates->BRIDGE_SENSOR_GPS_HEADINGS_LATITUDE,
+      .GEO_GPS_RECEIVED_LONGITUDE = new_coordinates->BRIDGE_SENSOR_GPS_HEADINGS_LONGITUDE};
+  dbc_encode_and_send_GEO_GPS_COMPASS_DBG_4(NULL, &message);
   destination_coordinates.longitude = new_coordinates->BRIDGE_SENSOR_GPS_HEADINGS_LONGITUDE;
-  if (destination_coordinates.longitude > 1000) {
-    destination_coordinates.longitude -= 1000;
-    destination_coordinates.longitude *= -1;
+  if (destination_coordinates.longitude > 1000.0f) {
+    destination_coordinates.longitude -= 1000.0f;
+    destination_coordinates.longitude = -destination_coordinates.longitude;
   }
   destination_coordinates.latitude = new_coordinates->BRIDGE_SENSOR_GPS_HEADINGS_LATITUDE;
-  if (destination_coordinates.latitude > 1000) {
-    destination_coordinates.latitude -= 1000;
-    destination_coordinates.latitude *= -1;
+  if (destination_coordinates.latitude > 1000.0f) {
+    destination_coordinates.latitude -= 1000.0f;
+    destination_coordinates.latitude = -destination_coordinates.latitude;
   }
 }
