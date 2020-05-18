@@ -243,7 +243,7 @@ void test__get_gps_lock_invalid(void) {
   gps__private_handle_line();
   board_io__get_led3_ExpectAndReturn(gpio);
   gpio__set_Expect(gpio);
-  const bool gps_lock_invalid = gps__private_get_gps_lock();
+  const bool gps_lock_invalid = gps__get_gps_lock();
   TEST_ASSERT_FALSE(gps_lock_invalid);
 }
 
@@ -257,6 +257,6 @@ void test__get_gps_lock_valid(void) {
   gps__private_handle_line();
   board_io__get_led3_ExpectAndReturn(gpio);
   gpio__toggle_Expect(gpio);
-  const bool gps_lock_valid = gps__private_get_gps_lock();
+  const bool gps_lock_valid = gps__get_gps_lock();
   TEST_ASSERT_TRUE(gps_lock_valid);
 }

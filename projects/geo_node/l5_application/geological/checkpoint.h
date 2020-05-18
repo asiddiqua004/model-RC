@@ -22,7 +22,11 @@
  *                               T Y P E D E F S
  *
  ******************************************************************************/
-
+typedef struct {
+  float checkpoint_distance_from_car;
+  float checkpoint_distance_from_dest;
+  size_t checkpoint_index;
+} checkpoint_candidates_t;
 /*******************************************************************************
  *
  *                      P U B L I C    F U N C T I O N S

@@ -206,17 +206,6 @@ static void gps__private_configure_for_nmea_gngga(void) {
   // uart_puts(gps_uart, disable_all_nmea_messages_and_enable_gngga);
 }
 
-static bool gps__private_get_gps_lock(void) {
-  if (1 == fix_quality || 2 == fix_quality) {
-    gps_lock = true;
-    gpio__toggle(board_io__get_led3());
-  } else if (0 == fix_quality) {
-    gpio__set(board_io__get_led3());
-    gps_lock = false;
-  }
-  return gps_lock;
-}
-
 void gps__private_send_debug_messages(void) {
   dbc_GEO_DEBUG_s geo_debug_messages = {0U};
   geo_debug_messages.GEO_DEBUG_CAN_INIT = can_bus_initalizer__get_can_init_status();
@@ -252,7 +241,7 @@ void gps__run_once(void) {
   }
   gps__private_absorb_data();
   gps__private_handle_line();
-  printf("GPS lock = %u\n\n", gps__private_get_gps_lock());
+  printf("GPS lock = %u\n\n", gps__get_gps_lock());
   // if (is_gps_disconnected == true) {
   //   printf("GPS disconnected\n");
   // }
@@ -260,3 +249,14 @@ void gps__run_once(void) {
 }
 
 gps_coordinates_t gps__get_coordinates(void) { return parsed_coordinates; }
+
+bool gps__get_gps_lock(void) {
+  if (1 == fix_quality || 2 == fix_quality) {
+    gps_lock = true;
+    gpio__toggle(board_io__get_led3());
+  } else if (0 == fix_quality) {
+    gpio__set(board_io__get_led3());
+    gps_lock = false;
+  }
+  return gps_lock;
+}

@@ -3,9 +3,9 @@
 // Mocks
 #include "Mockcan_bus_initializer.h"
 #include "Mockcan_bus_message_handler.h"
+#include "Mockcheckpoint.h"
 #include "Mockcompass.h"
 #include "Mockgps.h"
-#include "Mockcheckpoint.h"
 
 // Module includes
 #include "tesla_model_rc.h"

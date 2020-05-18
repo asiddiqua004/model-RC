@@ -1,12 +1,13 @@
+#include <float.h>
 #include <math.h>
 #include <stdio.h>
 
 #include "can_bus_initializer.h"
 #include "can_bus_message_handler.h"
+#include "checkpoint.h"
 #include "compass.h"
 #include "geological.h"
 #include "gps.h"
-#include "checkpoint.h"
 
 /*******************************************************************************
  *
@@ -18,6 +19,7 @@ static float compass_heading;
 static gps_coordinates_t current_coordinates;
 static gps_coordinates_t next_point_coordinates;
 static gps_coordinates_t destination_coordinates;
+static float distance_to_destination = FLT_MAX;
 #define M_PI 3.14159265358979323846264338327950288
 
 /*******************************************************************************
@@ -36,8 +38,8 @@ static float geological__private_compute_heading_degree(void) {
   // β = atan2(X,Y) <- This is the angle towards our desired destination in radians.
   // This then needs to be converted to degrees -> β * π / 180
 
-  const float theta_b = destination_coordinates.latitude;
-  const float delta_L = destination_coordinates.longitude - current_coordinates.longitude;
+  const float theta_b = next_point_coordinates.latitude;
+  const float delta_L = next_point_coordinates.longitude - current_coordinates.longitude;
   // const float delta_L = destination_coordinates.longitude > current_coordinates.longitude
   //                           ? destination_coordinates.longitude - current_coordinates.longitude
   //                           : current_coordinates.longitude - destination_coordinates.longitude;
@@ -53,8 +55,8 @@ static float geological__private_compute_heading_degree(void) {
 
   // targetHeading = fmodf(to_degree(atan2(x,y)) + 360, 360)
   // const float adjusted_heading = beta_degrees - compass_heading;
-  const dbc_GEO_GPS_COMPASS_DBG_2_s message = {.GEO_GPS_HEADINGS_LATITUDE_INT = destination_coordinates.latitude,
-                                               .GEO_GPS_HEADINGS_LONGITUDE_INT = destination_coordinates.longitude};
+  const dbc_GEO_GPS_COMPASS_DBG_2_s message = {.GEO_GPS_HEADINGS_LATITUDE_INT = next_point_coordinates.latitude,
+                                               .GEO_GPS_HEADINGS_LONGITUDE_INT = next_point_coordinates.longitude};
   dbc_encode_and_send_GEO_GPS_COMPASS_DBG_2(NULL, &message);
   const dbc_GEO_GPS_COMPASS_DBG_3_s message1 = {.GEO_GPS_CURRENT_LATITUDE_INT = current_coordinates.latitude,
                                                 .GEO_GPS_CURRENT_LONGITUDE_INT = current_coordinates.longitude};
@@ -97,13 +99,14 @@ void geological__run_once(void) {
   geological__private_handle_compass();
   geological__private_handle_gps();
   checkpoint__set_current_coordinates(current_coordinates);
+  checkpoint__run_once_10Hz();
   geological__private_compute_and_send_heading();
 }
 
 void geological__update_destination_coordinates(dbc_BRIDGE_SENSOR_GPS_HEADINGS_s *new_coordinates) {
   const dbc_GEO_GPS_COMPASS_DBG_4_s message = {
       .GEO_GPS_RECEIVED_LATITUDE = new_coordinates->BRIDGE_SENSOR_GPS_HEADINGS_LATITUDE,
-      .GEO_GPS_RECEIVED_LONGITUDE = new_coordinates->BRIDGE_SENSOR_GPS_HEADINGS_LONGITUDE};
+      .GEO_GPS_RECEIVED_LONGITUDE = new_coordinates->BRIDGE_SENSOR_GPS_HEADINGS_LONGITUDE,};
   dbc_encode_and_send_GEO_GPS_COMPASS_DBG_4(NULL, &message);
   destination_coordinates.longitude = new_coordinates->BRIDGE_SENSOR_GPS_HEADINGS_LONGITUDE;
   if (destination_coordinates.longitude > 1000.0f) {
@@ -115,9 +118,12 @@ void geological__update_destination_coordinates(dbc_BRIDGE_SENSOR_GPS_HEADINGS_s
     destination_coordinates.latitude -= 1000.0f;
     destination_coordinates.latitude = -destination_coordinates.latitude;
   }
+  checkpoint__set_destination_coordinates(destination_coordinates);
 }
 
 void geological__set_next_point_coordinates(gps_coordinates_t incoming_next_point_coordinates) {
   next_point_coordinates.latitude = incoming_next_point_coordinates.latitude;
   next_point_coordinates.longitude = incoming_next_point_coordinates.longitude;
 }
+
+void geological__set_distance_to_destination(float distance) { distance_to_destination = distance; }
