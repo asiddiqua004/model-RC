@@ -12,7 +12,6 @@
  *               P R I V A T E    D A T A    D E F I N I T I O N S
  *
  ******************************************************************************/
-// TODO: set function origin_coordinates, current_coordinates, destination_coordinates; // set this from geological file
 static gps_coordinates_t current_coordinates;
 static gps_coordinates_t destination_coordinates;
 static gps_coordinates_t next_point_coordinates;
@@ -24,7 +23,7 @@ static bool first_point = true;
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 #define NUMBER_OF_CHECKPOINTS (27U)
 
-#define M_PI 3.14159265359f
+#define M_PI 3.14159265358979323846264338327950288f
 
 static const gps_coordinates_t checkpoints[] = {
     {37.337210f, -121.879911f}, // 1
@@ -67,7 +66,8 @@ static checkpoint_candidates_t checkpoint_candidates[NUMBER_OF_CHECKPOINTS] = {0
 // Reference:
 // https://www.tutorialspoint.com/what-is-the-most-effective-way-for-float-and-double-comparison-in-c-cplusplus
 static bool checkpoint__private_compare_float(float x, float y) {
-  float epsilon = 0.01f;
+  float epsilon = 0.0001f;
+  printf("Float compare val: %f\n", fabs(x - y));
   if ((float)fabs(x - y) < epsilon)
     return true; // they are same
   return false;  // they are not same
@@ -110,10 +110,11 @@ static bool checkpoint__private_is_next_point_reached(void) {
       checkpoint__private_compare_float(current_coordinates.longitude, next_point_coordinates.longitude)) {
     if (checkpoint__private_compare_float(next_point_coordinates.latitude, destination_coordinates.latitude) &&
         checkpoint__private_compare_float(next_point_coordinates.longitude, destination_coordinates.longitude)) {
-      // is_destination_reached = true;
+      is_destination_reached = true;
+      printf("============================Final Destination Reached!=============================\n");
     }
     is_next_point_reached = true;
-    printf("============================Next Point Reached!=============================\n"); 
+    printf("============================Next Point Reached!=============================\n");
   }
   return is_next_point_reached;
 }
@@ -150,10 +151,10 @@ static void populate_candidate_checkpoints(void) {
         checkpoint__private_compute_distance_to_destination(current_coordinates, checkpoints[checkpoint_iterator]);
     const float checkpoint_distance_from_dest =
         checkpoint__private_compute_distance_to_destination(checkpoints[checkpoint_iterator], destination_coordinates);
-    const checkpoint_candidates_t checkpoint_candidate = {
-        .checkpoint_distance_from_car = checkpoint_distance_from_car,
-        .checkpoint_distance_from_dest = checkpoint_distance_from_dest,
-    };
+    const checkpoint_candidates_t checkpoint_candidate = {.checkpoint_distance_from_car = checkpoint_distance_from_car,
+                                                          .checkpoint_distance_from_dest =
+                                                              checkpoint_distance_from_dest,
+                                                          .checkpoint_index = checkpoint_iterator};
     checkpoint_candidates[checkpoint_iterator] = checkpoint_candidate;
   }
 }
@@ -201,6 +202,9 @@ static void checkpoint__private_find_next_point(void) {
         printf("checkpoint__private_find_next_point else block: %f, %f\n", (double)next_point_coordinates.latitude,
                (double)next_point_coordinates.longitude);
       }
+    } else {
+      checkpoint__private_compute_nearest_checkpoint();
+      geological__set_next_point_coordinates(next_point_coordinates);
     }
   }
   // if (checkpoint__private_is_next_point_reached()) {
@@ -242,6 +246,7 @@ void checkpoint__init(gps_coordinates_t incoming_origin_coordinates) {
   // next_point_coordinates.longitude = incoming_origin_coordinates.latitude;
   next_point_coordinates.latitude = checkpoints[0].latitude;
   next_point_coordinates.longitude = checkpoints[0].longitude;
+  geological__set_next_point_coordinates(next_point_coordinates);
 }
 
 void checkpoint__run_once_10Hz(void) {
@@ -255,6 +260,8 @@ void checkpoint__run_once_10Hz(void) {
          (double)current_coordinates.longitude);
   printf("run once: destination coordinates: %f, %f\n", (double)destination_coordinates.latitude,
          (double)destination_coordinates.longitude);
+  // printf("checkpoint_distance_from_car: %f\n",
+  //        (double)checkpoint__private_compute_distance_to_destination(current_coordinates, next_point_coordinates));
 }
 
 void checkpoint__set_current_coordinates(gps_coordinates_t incoming_current_coordinates) {
@@ -279,5 +286,6 @@ void checkpoint__set_destination_coordinates(gps_coordinates_t incoming_destinat
   } else {
     destination_coordinates.latitude = incoming_destination_coordinates.latitude;
     destination_coordinates.longitude = incoming_destination_coordinates.longitude;
+    checkpoint__private_compute_nearest_checkpoint();
   }
 }

@@ -20,7 +20,7 @@ static gps_coordinates_t current_coordinates;
 static gps_coordinates_t next_point_coordinates;
 static gps_coordinates_t destination_coordinates;
 static float distance_to_destination = FLT_MAX;
-#define M_PI 3.14159265358979323846264338327950288
+#define M_PI 3.14159265358979323846264338327950288f
 
 /*******************************************************************************
  *
@@ -106,7 +106,8 @@ void geological__run_once(void) {
 void geological__update_destination_coordinates(dbc_BRIDGE_SENSOR_GPS_HEADINGS_s *new_coordinates) {
   const dbc_GEO_GPS_COMPASS_DBG_4_s message = {
       .GEO_GPS_RECEIVED_LATITUDE = new_coordinates->BRIDGE_SENSOR_GPS_HEADINGS_LATITUDE,
-      .GEO_GPS_RECEIVED_LONGITUDE = new_coordinates->BRIDGE_SENSOR_GPS_HEADINGS_LONGITUDE,};
+      .GEO_GPS_RECEIVED_LONGITUDE = new_coordinates->BRIDGE_SENSOR_GPS_HEADINGS_LONGITUDE,
+  };
   dbc_encode_and_send_GEO_GPS_COMPASS_DBG_4(NULL, &message);
   destination_coordinates.longitude = new_coordinates->BRIDGE_SENSOR_GPS_HEADINGS_LONGITUDE;
   if (destination_coordinates.longitude > 1000.0f) {
