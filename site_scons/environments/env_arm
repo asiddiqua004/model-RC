@@ -35,7 +35,6 @@ env_arm = Environment(
     ASFLAGS=[],
     LINKFLAGS=[
         "-nostartfiles",
-        "-specs=nano.specs",
         "-specs=nosys.specs",
         "-Wl,--gc-sections",
     ],

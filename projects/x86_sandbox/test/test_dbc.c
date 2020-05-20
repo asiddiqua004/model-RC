@@ -142,7 +142,7 @@ void test_mia_replacement(void) {
   TEST_ASSERT_EQUAL(20, msg.MOTOR_STATUS_speed_kph);
 }
 
-bool dbc_send_can_message(void *argument, uint32_t message_id, const uint8_t bytes[8], uint8_t dlc) {
+bool test_dbc_send_can_message(void *argument, uint32_t message_id, const uint8_t bytes[8], uint8_t dlc) {
   TEST_ASSERT_EQUAL(dbc_header_MOTOR_STATUS.message_id, message_id);
   TEST_ASSERT_EQUAL(dbc_header_MOTOR_STATUS.message_dlc, dlc);
   TEST_ASSERT_EQUAL((void *)0xDEADBEEF, argument);
