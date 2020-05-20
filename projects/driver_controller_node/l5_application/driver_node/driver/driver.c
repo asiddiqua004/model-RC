@@ -214,21 +214,21 @@ static bool determine_battery_status_high(void) {
   return battery_status;
 }
 
-static bool start_motor_test(void) {
-  bool start_motor_status = false;
-  if (motor_test_flag == false && gpio__get(motor_test_switch)) {
-    start_motor_status = true;
-  }
-  return start_motor_status;
-}
+// static bool start_motor_test(void) {
+//   bool start_motor_status = false;
+//   if (motor_test_flag == false && gpio__get(motor_test_switch)) {
+//     start_motor_status = true;
+//   }
+//   return start_motor_status;
+// }
 
-static bool stop_motor_test(void) {
-  bool stop_motor_status = false;
-  if (motor_test_flag == true && gpio__get(motor_test_switch)) {
-    stop_motor_status = true;
-  }
-  return stop_motor_status;
-}
+// static bool stop_motor_test(void) {
+//   bool stop_motor_status = false;
+//   if (motor_test_flag == true && gpio__get(motor_test_switch)) {
+//     stop_motor_status = true;
+//   }
+//   return stop_motor_status;
+// }
 
 static void compute__motor_commands(void) {
   switch (state_machine_state) {

@@ -6,6 +6,7 @@
 #include "compass.h"
 #include "geological.h"
 #include "gps.h"
+#include "checkpoint.h"
 
 /*******************************************************************************
  *
@@ -15,6 +16,7 @@
 
 static float compass_heading;
 static gps_coordinates_t current_coordinates;
+static gps_coordinates_t next_point_coordinates;
 static gps_coordinates_t destination_coordinates;
 #define M_PI 3.14159265358979323846264338327950288
 
@@ -94,6 +96,7 @@ void geological__run_once(void) {
   gps__run_once();
   geological__private_handle_compass();
   geological__private_handle_gps();
+  checkpoint__set_current_coordinates(current_coordinates);
   geological__private_compute_and_send_heading();
 }
 
@@ -112,4 +115,9 @@ void geological__update_destination_coordinates(dbc_BRIDGE_SENSOR_GPS_HEADINGS_s
     destination_coordinates.latitude -= 1000.0f;
     destination_coordinates.latitude = -destination_coordinates.latitude;
   }
+}
+
+void geological__set_next_point_coordinates(gps_coordinates_t incoming_next_point_coordinates) {
+  next_point_coordinates.latitude = incoming_next_point_coordinates.latitude;
+  next_point_coordinates.longitude = incoming_next_point_coordinates.longitude;
 }

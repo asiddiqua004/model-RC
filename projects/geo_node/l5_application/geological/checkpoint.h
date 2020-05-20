@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 
+#include "gps.h"
 #include "tesla_model_rc.h"
 
 /*******************************************************************************
@@ -28,10 +29,9 @@
  *
  ******************************************************************************/
 
-bool geological__init(void);
+void checkpoint__init(gps_coordinates_t origin_coordinates);
 
-void geological__run_once(void);
+void checkpoint__run_once_10Hz(void);
 
-void geological__update_destination_coordinates(dbc_BRIDGE_SENSOR_GPS_HEADINGS_s *new_coordinates);
-
-void geological__set_next_point_coordinates(gps_coordinates_t next_point_coordinates);
+void checkpoint__set_destination_coordinates(gps_coordinates_t destination_coordinates);
+void checkpoint__set_current_coordinates(gps_coordinates_t current_coordinates);
