@@ -48,21 +48,34 @@
  *                                          P U B L I C   F U N C T I O N S
  *
  **********************************************************************************************************************/
-
-void byte_convert__to_network_from_uint64(uint8_t bytes[8], uint64_t source_value) {
-  for (size_t i = 8U; i > 0U; i--) {
-    bytes[8U - i] = (source_value >> ((i - 1U) * 8U)) & 0xFF;
-  }
+void traffic_light__init(traffic_light_s *traffic_light, traffic_time_s traffic_time) {
+  traffic_light->current_state = red;
+  traffic_light->timings.red_time_in_seconds = 10;
+  traffic_light->timings.green_time_in_seconds = 10;
+  traffic_light->timings.yellow_time_in_seconds = 3;
 }
 
-void byte_convert__to_network_from_uint32(uint8_t bytes[4], uint32_t source_value) {
-  for (size_t i = 4U; i > 0U; i--) {
-    bytes[4U - i] = (source_value >> ((i - 1U) * 8U)) & 0xFF;
+traffic_light_e traffic_light__run(traffic_light_s *traffic_light, uint32_t hz_1_counter) {
+  traffic_light->time_counter = hz_1_counter;
+  switch (traffic_light->current_state) {
+  case red: {
+    if (traffic_light->time_counter > 10) {
+      traffic_light->current_state = yellow;
+    }
+    break;
   }
-}
-
-void byte_convert__to_network_from_uint16(uint8_t bytes[2], uint16_t source_value) {
-  for (size_t i = 8U; i > 0U; i--) {
-    bytes[2U - i] = (source_value >> ((i - 1U) * 8U)) & 0xFF;
+  case yellow: {
+    if (hz_1_counter - traffic_light->time_counter > 3) {
+      traffic_light->current_state = green;
+    }
+    break;
   }
+  case green: {
+    if (hz_1_counter - traffic_light->time_counter > 10) {
+      traffic_light->current_state = red;
+    }
+    break;
+  }
+  }
+  return traffic_light->current_state;
 }

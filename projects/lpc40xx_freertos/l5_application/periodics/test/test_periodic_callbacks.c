@@ -7,6 +7,7 @@
 // - This will not pull the REAL source code of these modules (such as board_io.c)
 // - This will auto-generate "Mock" versions based on the header file
 #include "Mockboard_io.h"
+#include "Mockfinal.h"
 #include "Mockgpio.h"
 
 // Include the source we wish to test

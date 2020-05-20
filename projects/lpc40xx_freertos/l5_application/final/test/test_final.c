@@ -59,34 +59,6 @@ void tearDown(void) {}
  *
  **********************************************************************************************************************/
 
-void test_byte_convert__to_network_from_uint64(void) {
-  uint8_t bytes[8] = {0U};
+void test_traffic_light__init(void) {}
 
-  byte_convert__to_network_from_uint64(bytes, 0x123456789ABCDEF0U);
-  TEST_ASSERT_EQUAL(0x12U, bytes[0]);
-  TEST_ASSERT_EQUAL(0x34U, bytes[1]);
-  TEST_ASSERT_EQUAL(0x56U, bytes[2]);
-  TEST_ASSERT_EQUAL(0x78U, bytes[3]);
-  TEST_ASSERT_EQUAL(0x9AU, bytes[4]);
-  TEST_ASSERT_EQUAL(0xBCU, bytes[5]);
-  TEST_ASSERT_EQUAL(0xDEU, bytes[6]);
-  TEST_ASSERT_EQUAL(0xF0U, bytes[7]);
-}
-
-void test_byte_convert__to_network_from_uint32(void) {
-  uint8_t bytes[4] = {0U};
-
-  byte_convert__to_network_from_uint32(bytes, 0x12345678);
-  TEST_ASSERT_EQUAL(0x12, bytes[0]);
-  TEST_ASSERT_EQUAL(0x34, bytes[1]);
-  TEST_ASSERT_EQUAL(0x56, bytes[2]);
-  TEST_ASSERT_EQUAL(0x78, bytes[3]);
-}
-
-void test_byte_convert__to_network_from_uint16(void) {
-  uint8_t bytes[2] = {0U};
-
-  byte_convert__to_network_from_uint16(bytes, 0x1234);
-  TEST_ASSERT_EQUAL(0x12, bytes[0]);
-  TEST_ASSERT_EQUAL(0x34, bytes[1]);
-}
+void test_traffic_light__run(void) {}

@@ -1,6 +1,7 @@
 #include "periodic_callbacks.h"
 
 #include "board_io.h"
+#include "final.h"
 #include "gpio.h"
 
 /******************************************************************************
@@ -9,10 +10,14 @@
  * For 1000Hz, the function must return within 1ms
  */
 void periodic_callbacks__initialize(void) {
+  // traffic_light__init(red)
   // This method is invoked once when the periodic tasks are created
 }
 
 void periodic_callbacks__1Hz(uint32_t callback_count) {
+  uint32_t hz_1_counter;
+  hz_1_counter = hz_1_counter + 1;
+  // traffic_light__run(, hz_1_counter);
   gpio__toggle(board_io__get_led0());
   // Add your code here
 }
