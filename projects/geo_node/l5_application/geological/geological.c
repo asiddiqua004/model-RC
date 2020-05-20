@@ -63,6 +63,7 @@ static float geological__private_compute_heading_degree(void) {
   dbc_encode_and_send_GEO_GPS_COMPASS_DBG_3(NULL, &message1);
   const dbc_GEO_GPS_COMPASS_DBG_s message2 = {.GEO_GPS_BETA = beta_degrees};
   dbc_encode_and_send_GEO_GPS_COMPASS_DBG(NULL, &message2);
+  printf("Destination Heading degree: %f\n", (double)beta_degrees);
   return beta_degrees;
 }
 

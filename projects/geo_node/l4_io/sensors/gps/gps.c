@@ -43,7 +43,6 @@ static void gps__private_absorb_data(void) {
   char byte;
   while (uart__get(gps_uart, &byte, 0U)) {
     (void)line_buffer__add_byte(&line, byte);
-    printf("%c", byte);
   }
 }
 
@@ -241,7 +240,7 @@ void gps__run_once(void) {
   }
   gps__private_absorb_data();
   gps__private_handle_line();
-  printf("GPS lock = %u\n\n", gps__get_gps_lock());
+  // printf("GPS lock = %u\n\n", gps__get_gps_lock());
   // if (is_gps_disconnected == true) {
   //   printf("GPS disconnected\n");
   // }
