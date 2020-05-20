@@ -43,7 +43,9 @@ static bool motor_test_flag = false;
 static float previous_battery_voltage;
 static int8_t reverse_count = 0;
 static int8_t post_reverse_count = 0;
-// static gpio_s motor_test_switch;
+static int8_t test_forward_count = 0;
+static int8_t test_reverse_count = 0;
+static gpio_s motor_test_switch;
 /****************PRIVATE FUNCTIONS ****************/
 
 // Reference:
@@ -212,21 +214,21 @@ static bool determine_battery_status_high(void) {
   return battery_status;
 }
 
-// static bool start_motor_test(void) {
-//   bool start_motor_status = false;
-//   if (motor_test_flag == false && gpio__get(motor_test_switch)) {
-//     start_motor_status = true;
-//   }
-//   return start_motor_status;
-// }
+static bool start_motor_test(void) {
+  bool start_motor_status = false;
+  if (motor_test_flag == false && gpio__get(motor_test_switch)) {
+    start_motor_status = true;
+  }
+  return start_motor_status;
+}
 
-// static bool stop_motor_test(void) {
-//   bool stop_motor_status = false;
-//   if (motor_test_flag == true && gpio__get(motor_test_switch)) {
-//     stop_motor_status = true;
-//   }
-//   return stop_motor_status;
-// }
+static bool stop_motor_test(void) {
+  bool stop_motor_status = false;
+  if (motor_test_flag == true && gpio__get(motor_test_switch)) {
+    stop_motor_status = true;
+  }
+  return stop_motor_status;
+}
 
 static void compute__motor_commands(void) {
   switch (state_machine_state) {
@@ -238,22 +240,31 @@ static void compute__motor_commands(void) {
     break;
 
   case WAIT:
-    // if (stop_motor_test()) {
-    //   motor_test_flag = false;
-    //   state_machine_state = WAIT;
-    //   set_lcd_driver_state("WAIT");
-    //   set_motor_status(MOTOR_STOP_KPH, STEER_STRAIGHT);
-    //   return;
-    // }
-    // if (start_motor_test()) {
-    //   state_machine_state = WAIT;
-    //   set_lcd_driver_state("TEST");
-    //   motor_test_flag = true;
-    //   set_motor_status(MOTOR_TEST_KPH, STEER_STRAIGHT);
-    //   return;
-    // }
+    if (stop_motor_test()) {
+      motor_test_flag = false;
+      state_machine_state = WAIT;
+      set_lcd_driver_state("WAIT");
+      test_forward_count = 0;
+      test_reverse_count = 0;
+    }
+    if (start_motor_test()) {
+      state_machine_state = WAIT;
+      test_forward_count = 1;
+      test_reverse_count = 1;
+      set_lcd_driver_state("TEST");
+    }
     set_motor_status(MOTOR_STOP_KPH, STEER_STRAIGHT);
-    if (0 != driver_navigation_state && all_nodes_alive() && determine_battery_status_high()) {
+
+    if (test_forward_count > 0 || test_reverse_count > 0) {
+      set_lcd_driver_state("TEST");
+      if (test_forward_count < 50) {
+        test_forward_count++;
+        set_motor_status(MOTOR_MED_KPH, STEER_STRAIGHT);
+      } else if (test_reverse_count < 50) {
+        test_reverse_count++;
+        set_motor_status(MOTOR_REV_MED_KPH, STEER_STRAIGHT);
+      }
+    } else if (0 != driver_navigation_state && all_nodes_alive() && determine_battery_status_high()) {
       state_machine_state = OBSTACLE;
       set_lcd_driver_state("WAIT");
     } else if (!determine_battery_status_high()) {

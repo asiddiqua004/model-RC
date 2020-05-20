@@ -16,7 +16,7 @@
 #define MOTOR_MED_KPH 5.95
 #define MOTOR_FAST_KPH 6.00
 #define MOTOR_STOP_KPH 5.00
-// #define  MOTOR_TEST_KPH   0.00f
+#define MOTOR_TEST_KPH 0.00f
 // #define  MOTOR_REV_SLOW_KPH 0.40
 #define MOTOR_REV_MED_KPH 4.10f //-0.50
 
