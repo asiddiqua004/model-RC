@@ -57,7 +57,7 @@ static const pwm1_channel_e pwm_channel_steering = PWM1__2_4;
 static uint32_t rotor_tick_count;
 #define PI 3.14159265359f;
 static uint32_t previous_rotor_check_time_ms;
-static const float ticks_per_rotation = 130.0f; // 55
+static const float ticks_per_rotation = 165.0f; // 55, 130
 static const uint32_t rotor_processing_interval_ms = 100U;
 static const float wheel_circumference_cm = 10.0f * PI; // Cirmcumference = PI * diameter
 static float latest_calculated_ground_speed_km_per_hour;
