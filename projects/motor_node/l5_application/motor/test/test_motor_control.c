@@ -74,25 +74,6 @@ void test_motor_control__initialize(void) {
   motor_control__initialize();
 }
 
-void test_motor_control__handle_speed(void) {
-  // TODO: Rewrite once speed control redesign is done
-  // gpio_s gpio = {0U};
-
-  // motor_control_state.current_speed_kph_mapped = 8.9f;
-  // sys_time__get_uptime_ms_ExpectAndReturn(1);
-
-  // // Stop motor condition
-  // pwm1__set_duty_cycle_Expect(pwm_channel_speed, motor_control_state.current_speed_kph_mapped);
-  // motor_control__handle_speed();
-
-  // motor_control_state.current_speed_kph_mapped = 9.3f;
-  // sys_time__get_uptime_ms_ExpectAndReturn(5000);
-
-  // // Motor forward condition
-  // pwm1__set_duty_cycle_Expect(pwm_channel_speed, motor_control_state.current_speed_kph_mapped);
-  // motor_control__handle_speed();
-}
-
 void test_motor_control__handle_steering(void) {
 
   motor_control_state.current_steer_degrees_mapped = 0.0f;
@@ -112,7 +93,7 @@ void test_motor_control__update_speed_and_steering(void) {
   dbc_DRIVER_MOTOR_CONTROL_s message = {.DRIVER_MOTOR_CONTROL_SPEED_KPH = 5.0f, .DRIVER_MOTOR_CONTROL_STEER = 1.2f};
 
   motor_control__update_speed_and_steering(&message);
-  TEST_ASSERT_EQUAL_FLOAT(8.25f, motor_control_state.current_speed_kph_mapped);
+  TEST_ASSERT_EQUAL_FLOAT(8.5f, motor_control_state.current_speed_kph_mapped);
   TEST_ASSERT_EQUAL_FLOAT(10.035f, motor_control_state.current_steer_degrees_mapped);
 
   // Test outbounds
@@ -139,5 +120,5 @@ void test_motor_control__private_handle_rotor(void) {
   dbc_send_can_message_ExpectAnyArgsAndReturn(true);
   motor_control__private_handle_rotor();
   TEST_ASSERT_EQUAL(0U, rotor_tick_count);
-  TEST_ASSERT_EQUAL_FLOAT(3.999122f, latest_calculated_ground_speed_km_per_hour);
+  TEST_ASSERT_EQUAL_FLOAT(12.11855f, latest_calculated_ground_speed_km_per_hour);
 }
