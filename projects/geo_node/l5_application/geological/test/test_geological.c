@@ -76,11 +76,18 @@ void test_geological_run_once(void) {
   gps__run_once_Expect();
   compass__get_heading_degrees_ExpectAndReturn(0.0f);
   gps__get_coordinates_ExpectAndReturn(coordinates);
+  checkpoint__set_current_coordinates_ExpectAnyArgs();
+  checkpoint__run_once_10Hz_Expect();
+  dbc_send_can_message_ExpectAnyArgsAndReturn(true);
+  dbc_send_can_message_ExpectAnyArgsAndReturn(true);
+  dbc_send_can_message_ExpectAnyArgsAndReturn(true);
   dbc_send_can_message_ExpectAnyArgsAndReturn(true);
   geological__run_once();
 }
 
 void test_geological__update_destination_coordinates(void) {
+  dbc_send_can_message_ExpectAnyArgsAndReturn(true);
+  checkpoint__set_destination_coordinates_ExpectAnyArgs();
   dbc_BRIDGE_SENSOR_GPS_HEADINGS_s message = {.BRIDGE_SENSOR_GPS_HEADINGS_LONGITUDE = 1.0f,
                                               .BRIDGE_SENSOR_GPS_HEADINGS_LATITUDE = 2.0f};
   geological__update_destination_coordinates(&message);

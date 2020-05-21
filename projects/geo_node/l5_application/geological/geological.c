@@ -20,7 +20,9 @@ static gps_coordinates_t current_coordinates;
 static gps_coordinates_t next_point_coordinates;
 static gps_coordinates_t destination_coordinates;
 static float distance_to_destination = FLT_MAX;
+#ifndef M_PI
 #define M_PI 3.14159265358979323846264338327950288f
+#endif
 
 /*******************************************************************************
  *
@@ -40,9 +42,6 @@ static float geological__private_compute_heading_degree(void) {
 
   const float theta_b = next_point_coordinates.latitude;
   const float delta_L = next_point_coordinates.longitude - current_coordinates.longitude;
-  // const float delta_L = destination_coordinates.longitude > current_coordinates.longitude
-  //                           ? destination_coordinates.longitude - current_coordinates.longitude
-  //                           : current_coordinates.longitude - destination_coordinates.longitude;
   const float theta_a = current_coordinates.latitude;
 
   const float X = cosf(theta_b) * sinf(delta_L);
@@ -53,8 +52,6 @@ static float geological__private_compute_heading_degree(void) {
   }
   const float beta_degrees = beta * (180.0f / (float)M_PI);
 
-  // targetHeading = fmodf(to_degree(atan2(x,y)) + 360, 360)
-  // const float adjusted_heading = beta_degrees - compass_heading;
   const dbc_GEO_GPS_COMPASS_DBG_2_s message = {.GEO_GPS_HEADINGS_LATITUDE_INT = next_point_coordinates.latitude,
                                                .GEO_GPS_HEADINGS_LONGITUDE_INT = next_point_coordinates.longitude};
   dbc_encode_and_send_GEO_GPS_COMPASS_DBG_2(NULL, &message);
@@ -63,19 +60,12 @@ static float geological__private_compute_heading_degree(void) {
   dbc_encode_and_send_GEO_GPS_COMPASS_DBG_3(NULL, &message1);
   const dbc_GEO_GPS_COMPASS_DBG_s message2 = {.GEO_GPS_BETA = beta_degrees};
   dbc_encode_and_send_GEO_GPS_COMPASS_DBG(NULL, &message2);
-  printf("Destination Heading degree: %f\n", (double)beta_degrees);
   return beta_degrees;
 }
 
-static void geological__private_handle_compass() {
-  compass_heading = compass__get_heading_degrees();
-  printf("Compass heading degree: %f\n", (double)compass_heading);
-}
+static void geological__private_handle_compass() { compass_heading = compass__get_heading_degrees(); }
 
-static void geological__private_handle_gps() {
-  current_coordinates = gps__get_coordinates();
-  printf("Latitude: %f  Longitude: %f\n", (double)current_coordinates.latitude, (double)current_coordinates.longitude);
-}
+static void geological__private_handle_gps() { current_coordinates = gps__get_coordinates(); }
 
 static void geological__private_compute_and_send_heading() {
   const float destination_heading = geological__private_compute_heading_degree();

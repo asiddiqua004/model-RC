@@ -64,8 +64,8 @@ static const char configuration_messages[] = {
     0x06, 0x01, 0x08, 0x00, 0xF0, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x38, 0xB5, 0x62, 0x06,
     0x01, 0x08, 0x00, 0xF0, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x3F, 0xB5, 0x62, 0x06, 0x01,
     0x08, 0x00, 0xF0, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x46, 0x28};
-static const gps_coordinates_t parsed_coordinates_test_negative = {.latitude = -1234.5678f, .longitude = -12102.4634f};
-static const gps_coordinates_t parsed_coordinates_test_positive = {.latitude = 1234.5678f, .longitude = 12102.4634f};
+static const gps_coordinates_t parsed_coordinates_test_negative = {.latitude = -12.345678f, .longitude = -121.024634f};
+static const gps_coordinates_t parsed_coordinates_test_positive = {.latitude = 12.345678f, .longitude = 121.024634f};
 
 /******************************************************************************
  *
@@ -171,8 +171,6 @@ void test_gps_run_once(void) {
   gpio_s gpio = {0U};
   uart__put_StubWithCallback(uart__put_stub_callback);
   uart__get_StubWithCallback(uart__get_stub_callback_gps_lock);
-  board_io__get_led3_ExpectAndReturn(gpio);
-  gpio__toggle_Expect(gpio);
   can_bus_initalizer__get_can_init_status_ExpectAndReturn(true);
   dbc_send_can_message_ExpectAnyArgsAndReturn(true);
   gps__run_once();
