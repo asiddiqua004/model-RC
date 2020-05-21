@@ -64,8 +64,8 @@ static const char configuration_messages[] = {
     0x06, 0x01, 0x08, 0x00, 0xF0, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x38, 0xB5, 0x62, 0x06,
     0x01, 0x08, 0x00, 0xF0, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x3F, 0xB5, 0x62, 0x06, 0x01,
     0x08, 0x00, 0xF0, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x46, 0x28};
-static const gps_coordinates_t parsed_coordinates_test_negative = {.latitude = -12.345678f, .longitude = -121.024634f};
-static const gps_coordinates_t parsed_coordinates_test_positive = {.latitude = 12.345678f, .longitude = 121.024634f};
+static const gps_coordinates_t parsed_coordinates_test_negative = {.latitude = -12.57613f, .longitude = -121.0411f};
+static const gps_coordinates_t parsed_coordinates_test_positive = {.latitude = 12.57613f, .longitude = 121.0411f};
 
 /******************************************************************************
  *
@@ -189,8 +189,8 @@ void test_gps_private_handle_line_negative_values(void) {
 
   gps__private_handle_line();
 
-  TEST_ASSERT_EQUAL(parsed_coordinates_test_negative.latitude, parsed_coordinates.latitude);
-  TEST_ASSERT_EQUAL(parsed_coordinates_test_negative.longitude, parsed_coordinates.longitude);
+  TEST_ASSERT_EQUAL_FLOAT(parsed_coordinates_test_negative.latitude, parsed_coordinates.latitude);
+  TEST_ASSERT_EQUAL_FLOAT(parsed_coordinates_test_negative.longitude, parsed_coordinates.longitude);
 }
 
 void test_gps_private_handle_line_positive_values(void) {
@@ -201,8 +201,8 @@ void test_gps_private_handle_line_positive_values(void) {
 
   gps__private_handle_line();
 
-  TEST_ASSERT_EQUAL(parsed_coordinates_test_positive.latitude, parsed_coordinates.latitude);
-  TEST_ASSERT_EQUAL(parsed_coordinates_test_positive.longitude, parsed_coordinates.longitude);
+  TEST_ASSERT_EQUAL_FLOAT(parsed_coordinates_test_positive.latitude, parsed_coordinates.latitude);
+  TEST_ASSERT_EQUAL_FLOAT(parsed_coordinates_test_positive.longitude, parsed_coordinates.longitude);
 }
 
 void test_gps_get_parsed_coordinates(void) {
@@ -213,8 +213,8 @@ void test_gps_get_parsed_coordinates(void) {
 
   gps__private_handle_line();
   gps_coordinates_t coordinates = gps__get_coordinates();
-  TEST_ASSERT_EQUAL(parsed_coordinates_test_positive.latitude, coordinates.latitude);
-  TEST_ASSERT_EQUAL(parsed_coordinates_test_positive.longitude, coordinates.longitude);
+  TEST_ASSERT_EQUAL_FLOAT(parsed_coordinates_test_positive.latitude, coordinates.latitude);
+  TEST_ASSERT_EQUAL_FLOAT(parsed_coordinates_test_positive.longitude, coordinates.longitude);
 }
 
 void test_gps_verify_nmea_checksum(void) {

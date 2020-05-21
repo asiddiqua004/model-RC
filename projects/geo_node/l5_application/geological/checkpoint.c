@@ -24,7 +24,9 @@ static bool first_point = true;
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 #define NUMBER_OF_CHECKPOINTS (5U)
 
+#ifndef M_PI
 #define M_PI 3.14159265358979323846264338327950288f
+#endif
 
 // static const gps_coordinates_t checkpoints[] = {
 //     {37.337210f, -121.879911f}, {37.337161f, -121.880080f}, {37.337104f, -121.880223f}, {37.337057f, -121.880312f},
@@ -94,11 +96,11 @@ static bool first_point = true;
 
 // Checkpoints North Garage SJSU
 static const gps_coordinates_t checkpoints[] = {
-    {37.339822, -121.880966}, // 1
-    {37.339612, -121.880783}, // 2
-    {37.339418, -121.880640}, // 3
-    {37.339166, -121.880458}, // 4
-    {37.338945, -121.880286}, // 5
+    {37.339822f, -121.880966f}, // 1
+    {37.339612f, -121.880783f}, // 2
+    {37.339418f, -121.880640f}, // 3
+    {37.339166f, -121.880458f}, // 4
+    {37.338945f, -121.880286f}, // 5
 };
 
 static checkpoint_candidates_t checkpoint_candidates[NUMBER_OF_CHECKPOINTS] = {0U};
@@ -112,7 +114,6 @@ static checkpoint_candidates_t checkpoint_candidates[NUMBER_OF_CHECKPOINTS] = {0
 // https://www.tutorialspoint.com/what-is-the-most-effective-way-for-float-and-double-comparison-in-c-cplusplus
 static bool checkpoint__private_compare_float(float x, float y) {
   float epsilon = 0.0001f;
-  printf("Float compare val: %f\n", fabs(x - y));
   if ((float)fabs(x - y) < epsilon)
     return true; // they are same
   return false;  // they are not same
@@ -195,9 +196,6 @@ static void populate_candidate_checkpoints(void) {
         .checkpoint_index = checkpoint_iterator,
     };
     checkpoint_candidates[checkpoint_iterator] = checkpoint_candidate;
-    printf("Populated Checkpoint %u, distance from car %f, distance from checkpoint %f\n",
-           checkpoint_candidate.checkpoint_index, (double)checkpoint_candidate.checkpoint_distance_from_car,
-           (double)checkpoint_candidate.checkpoint_distance_from_dest);
   }
 }
 

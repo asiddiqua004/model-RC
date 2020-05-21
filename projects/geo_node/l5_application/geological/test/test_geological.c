@@ -105,5 +105,3 @@ void test_geological__private_handle_gps(void) {
   gps__get_coordinates_ExpectAndReturn(coordinates);
   geological__private_handle_gps();
 }
-
-// TODO: Revise Algorithm in geological__private_compute_heading_degree and retest

@@ -87,6 +87,6 @@ void test_compass__get_heading_degrees(void) {
   acceleration__get_data_ExpectAndReturn(accel_data);
 
   const float compass_heading_degrees = compass__private_compute_heading(axis_data) * 180.0f / (float)M_PI;
-  TEST_ASSERT_EQUAL(356.0f, compass_heading_degrees);
+  TEST_ASSERT_EQUAL_FLOAT(356.9234f, compass_heading_degrees);
   compass__get_heading_degrees();
 }
