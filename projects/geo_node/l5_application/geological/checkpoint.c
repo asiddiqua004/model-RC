@@ -148,6 +148,7 @@ static bool checkpoint__private_is_next_point_reached(void) {
   bool is_next_point_reached = false;
   if (checkpoint__private_compare_float(current_coordinates.latitude, next_point_coordinates.latitude) &&
       checkpoint__private_compare_float(current_coordinates.longitude, next_point_coordinates.longitude)) {
+
     if (checkpoint__private_compare_float(next_point_coordinates.latitude, destination_coordinates.latitude) &&
         checkpoint__private_compare_float(next_point_coordinates.longitude, destination_coordinates.longitude)) {
       is_destination_reached = true;
@@ -194,6 +195,9 @@ static void populate_candidate_checkpoints(void) {
         .checkpoint_index = checkpoint_iterator,
     };
     checkpoint_candidates[checkpoint_iterator] = checkpoint_candidate;
+    printf("Populated Checkpoint %u, distance from car %f, distance from checkpoint %f\n",
+           checkpoint_candidate.checkpoint_index, (double)checkpoint_candidate.checkpoint_distance_from_car,
+           (double)checkpoint_candidate.checkpoint_distance_from_dest);
   }
 }
 
