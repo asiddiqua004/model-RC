@@ -1,12 +1,17 @@
 #include "unity.h"
 
 // Mocks
+#include "Mockcan_bus_message_handler.h"
 #include "Mockcompass.h"
 #include "Mockgeological.h"
 #include "Mockgps.h"
 
 // Module includes
 #include "checkpoint.c"
+
+#include "tesla_model_rc.h"
+
+#include "can_bus_mia_configurations.h"
 
 /******************************************************************************
  *

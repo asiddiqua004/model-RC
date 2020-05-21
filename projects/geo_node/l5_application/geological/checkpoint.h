@@ -22,6 +22,12 @@
  *                               T Y P E D E F S
  *
  ******************************************************************************/
+typedef struct {
+  float checkpoint_distance_from_car;
+  float checkpoint_distance_from_dest;
+  size_t checkpoint_index;
+  bool visited;
+} checkpoint_candidates_t;
 
 /*******************************************************************************
  *
@@ -30,8 +36,6 @@
  ******************************************************************************/
 
 void checkpoint__init(gps_coordinates_t origin_coordinates);
-
 void checkpoint__run_once_10Hz(void);
-
 void checkpoint__set_destination_coordinates(gps_coordinates_t destination_coordinates);
 void checkpoint__set_current_coordinates(gps_coordinates_t current_coordinates);

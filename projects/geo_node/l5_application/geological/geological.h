@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 
+#include "gps.h"
 #include "tesla_model_rc.h"
 
 /*******************************************************************************
@@ -35,3 +36,5 @@ void geological__run_once(void);
 void geological__update_destination_coordinates(dbc_BRIDGE_SENSOR_GPS_HEADINGS_s *new_coordinates);
 
 void geological__set_next_point_coordinates(gps_coordinates_t next_point_coordinates);
+
+void geological__set_distance_to_destination(float distance);

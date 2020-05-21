@@ -6,12 +6,13 @@
 static const can__num_e can_bus = can1;
 static bool can_bus_init_status = false;
 
-void can_bus_initializer__init(void) {
+bool can_bus_initializer__init(void) {
   can_bus_init_status = can__init(can_bus, 250, 100, 100, NULL, NULL);
   if (can_bus_init_status) {
     can__bypass_filter_accept_all_msgs();
     can__reset_bus(can_bus);
   }
+  return can_bus_init_status;
 }
 
 void can_bus_initializer__turn_can_bus_on_if_off(void) {

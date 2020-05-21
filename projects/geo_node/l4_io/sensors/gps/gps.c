@@ -31,7 +31,6 @@ static gps_coordinates_t parsed_coordinates;
 static uint8_t fix_quality = 0;
 static bool is_gps_configured = false;
 static bool gps_lock = false;
-// static bool is_gps_disconnected = false;
 
 /*******************************************************************************
  *
@@ -43,7 +42,6 @@ static void gps__private_absorb_data(void) {
   char byte;
   while (uart__get(gps_uart, &byte, 0U)) {
     (void)line_buffer__add_byte(&line, byte);
-    printf("%c", byte);
   }
 }
 
@@ -146,18 +144,10 @@ static void gps__private_handle_line(void) {
     }
   }
 }
-// if (false == line_buffer__remove_line(&line, gps_line, sizeof(gps_line))) {
-//   // Fix quality is set to 0 in the case the GPS is disconnected
-//   fix_quality = 0;
-//   // is_gps_configured = false;
-//   is_gps_disconnected = true;
-// } else {
-//   is_gps_disconnected = false;
-// }
 
 static void gps__private_configure_for_nmea_gngga(void) {
 
-  // // Disable all NMEA messages
+  // Disable all NMEA messages
   // char disable_gngga_message[] = {0xB5, 0x62, 0x06, 0x01, 0x08, 0x00, 0xF0, 0x00,
   //                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x23};
   // char disable_gngll_message[] = {0xB5, 0x62, 0x06, 0x01, 0x08, 0x00, 0xF0, 0x01,
@@ -194,27 +184,14 @@ static void gps__private_configure_for_nmea_gngga(void) {
       0x62, 0x06, 0x01, 0x08, 0x00, 0xF0, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x31, 0xB5, 0x62,
       0x06, 0x01, 0x08, 0x00, 0xF0, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x38, 0xB5, 0x62, 0x06,
       0x01, 0x08, 0x00, 0xF0, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x3F, 0xB5, 0x62, 0x06, 0x01,
-      0x08, 0x00, 0xF0, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x46, 0x28};
+      0x08, 0x00, 0xF0, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x46, 0x28,
+  };
 
   size_t i = 0;
   while (disable_all_nmea_messages_except_gngga[i] != 0x28) {
     uart__put(gps_uart, disable_all_nmea_messages_except_gngga[i], 0U);
     i++;
   }
-
-  // is_gps_configured = true;
-  // uart_puts(gps_uart, disable_all_nmea_messages_and_enable_gngga);
-}
-
-static bool gps__private_get_gps_lock(void) {
-  if (1 == fix_quality || 2 == fix_quality) {
-    gps_lock = true;
-    gpio__toggle(board_io__get_led3());
-  } else if (0 == fix_quality) {
-    gpio__set(board_io__get_led3());
-    gps_lock = false;
-  }
-  return gps_lock;
 }
 
 void gps__private_send_debug_messages(void) {
@@ -247,16 +224,21 @@ void gps__run_once(void) {
   if (false == is_gps_configured) {
     is_gps_configured = true;
     gps__private_configure_for_nmea_gngga();
-    puts("Configured");
-    fflush(stdout);
   }
   gps__private_absorb_data();
   gps__private_handle_line();
-  printf("GPS lock = %u\n\n", gps__private_get_gps_lock());
-  // if (is_gps_disconnected == true) {
-  //   printf("GPS disconnected\n");
-  // }
   gps__private_send_debug_messages();
 }
 
 gps_coordinates_t gps__get_coordinates(void) { return parsed_coordinates; }
+
+bool gps__get_gps_lock(void) {
+  if (1 == fix_quality || 2 == fix_quality) {
+    gps_lock = true;
+    gpio__toggle(board_io__get_led3());
+  } else if (0 == fix_quality) {
+    gpio__set(board_io__get_led3());
+    gps_lock = false;
+  }
+  return gps_lock;
+}
